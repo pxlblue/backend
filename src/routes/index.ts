@@ -1,4 +1,7 @@
 import RootRouter from './RootRouter'
 import AuthRouter from './AuthRouter'
 import UsersRouter from './UsersRouter'
-export { RootRouter, AuthRouter, UsersRouter }
+import UploadRouter from './UploadRouter'
+import ProxyRouter from './ProxyRouter'
+
+export { RootRouter, AuthRouter, UsersRouter, UploadRouter, ProxyRouter }

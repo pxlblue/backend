@@ -1,0 +1,75 @@
+import {
+  Entity,
+  Column,
+  BaseEntity,
+  PrimaryColumn,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm'
+@Entity()
+export class Image extends BaseEntity {
+  @PrimaryGeneratedColumn()
+  id: number
+
+  @Column()
+  shortId: string
+
+  @Column()
+  uploader: number
+
+  @Column()
+  host: string
+
+  @Column()
+  contentType: string
+
+  @Column('timestamp with time zone')
+  uploadTime: Date
+
+  @Column()
+  size: number
+
+  @Column()
+  hash: string
+
+  @Column()
+  url: string
+
+  @Column()
+  path: string
+
+  @Column()
+  originalName: string
+
+  @Column({
+    default: false,
+  })
+  deleted: boolean
+
+  @Column({
+    default: 'N/A',
+  })
+  deletionReason: string
+
+  @Column()
+  uploaderIp: string
+
+  serialize() {
+    return {
+      id: this.id,
+      shortId: this.shortId,
+      uploader: this.uploader,
+      host: this.host,
+      contentType: this.contentType,
+      uploadTime: this.uploadTime,
+      size: this.size,
+      hash: this.hash,
+      url: this.url,
+      path: this.path,
+      originalName: this.originalName,
+      deleted: this.deleted,
+      deletionReason: this.deletionReason,
+      uploaderIp: this.uploaderIp,
+    }
+  }
+}

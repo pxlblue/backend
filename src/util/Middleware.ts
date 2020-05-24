@@ -16,6 +16,12 @@ export function authMiddleware() {
     if (req.headers.authorization) {
       sessionToken = req.headers.authorization
     }
+    if (req.query && req.query.auth) {
+      sessionToken = req.query.auth
+    }
+    if (req.body && req.body.auth) {
+      sessionToken = req.body.auth
+    }
     if (!sessionToken || !sessionToken.startsWith('Bearer ')) {
       return res.status(401).json({
         success: false,
@@ -31,7 +37,6 @@ export function authMiddleware() {
         sessionString: sessionToken,
       },
     })
-
     if (!session) {
       return res.status(401).json({
         success: false,

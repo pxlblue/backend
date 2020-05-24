@@ -62,6 +62,35 @@ UsersRouter.route('/@me/invites')
     })
   })
 
-UsersRouter.route('/@me/')
+const BASE_UPLOADER_CONFIG = {
+  Version: '13.1.0',
+  Name: 'pxl.blue (%username%)',
+  DestinationType: 'ImageUploader, FileUploader',
+  RequestMethod: 'POST',
+  RequestURL: 'https://api.pxl.blue/upload/sharex',
+  Body: 'MultipartFormData',
+  Arguments: {
+    key: '%key%',
+    host: 'i.pxl.blue',
+  },
+  FileFormName: 'file',
+}
+UsersRouter.route('/@me/generate_sharex_config').get(async (req, res) => {
+  let cfg = {
+    ...BASE_UPLOADER_CONFIG,
+    Name: `pxl.blue (${req.user.username})`,
+    Arguments: {
+      key: req.user.uploadKey,
+      host: 'i.pxl.blue',
+    },
+  }
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename=pxl.blue_${req.user.username}.sxcu`
+  )
+  res.setHeader('Content-Transfer-Encoding', 'binary')
+  res.setHeader('Content-Type', 'application/octet-stream')
+  return res.send(JSON.stringify(cfg))
+})
 
 export default UsersRouter

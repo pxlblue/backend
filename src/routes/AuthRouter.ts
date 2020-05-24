@@ -267,6 +267,10 @@ AuthRouter.route('/login').post(async (req, res) => {
       errors: ['your email is not verified, please check your email'],
     })
   }
+
+  if (!user.usedIps.includes(req.ip)) {
+    user.usedIps.push(req.ip)
+  }
   let now = moment()
 
   user.lastLogin = now.toDate()
