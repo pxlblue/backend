@@ -9,4 +9,8 @@ RootRouter.route('/').all((req, res) => {
   })
 })
 
+RootRouter.route('/discord').all((req, res) => {
+  res.redirect(process.env.DISCORD_INVITE!)
+})
+
 export default RootRouter
