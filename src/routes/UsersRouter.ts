@@ -1,8 +1,10 @@
 import express from 'express'
+
+import { authMiddleware } from '../util/Middleware'
+import { Invite } from '../database/entities/Invite'
 import { randomBytes } from '../util/RandomUtil'
 import { User } from '../database/entities/User'
 import bodyParser from 'body-parser'
-import { authMiddleware } from '../util/Middleware'
 
 const valid_username_regex = /^[a-z0-9]+$/i
 const email_regex = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/
@@ -20,5 +22,46 @@ UsersRouter.route('/@me').get(async (req, res) => {
     user: req.user.serialize(),
   })
 })
+
+UsersRouter.route('/@me/invites')
+  .get(async (req, res) => {
+    let invites = await Invite.find({
+      where: {
+        creator: req.user.id,
+      },
+    })
+    return res.status(200).json({
+      success: true,
+      message: 'ok',
+      invites: invites.map((invite) => invite.serialize()),
+      canCreateInvites: req.user.admin || req.user.moderator,
+    })
+  })
+  .post(async (req, res) => {
+    let canCreateInvite = req.user.admin || req.user.moderator
+    if (!canCreateInvite) {
+      return res.status(400).json({
+        success: false,
+        message: 'cant create invite',
+        errors: ['you do not have permission to create a new invite'],
+      })
+    }
+
+    let invite = new Invite()
+    invite.invite = randomBytes(20)
+    invite.createdAt = new Date()
+    invite.creator = req.user.id
+    await invite.save()
+
+    // decrease available invite counter
+
+    return res.status(200).json({
+      success: true,
+      message: 'invite created',
+      invite: invite.serialize(),
+    })
+  })
+
+UsersRouter.route('/@me/')
 
 export default UsersRouter

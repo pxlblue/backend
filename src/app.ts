@@ -1,10 +1,12 @@
 import express from 'express'
 import { RootRouter, AuthRouter, UsersRouter } from './routes'
-
+import cors from 'cors'
 const app = express()
 
 app.enable('trust proxy')
 app.disable('x-powered-by')
+
+app.use(cors())
 
 app.use('/', RootRouter)
 app.use('/auth', AuthRouter)
