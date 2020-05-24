@@ -27,6 +27,8 @@ async function uploadImage(
   useOriginalName: boolean,
   ip: string
 ): Promise<Image> {
+  user.imageCount = user.imageCount + 1
+  await user.save()
   let image = new Image()
   image.shortId = randomImageId()
   image.host = host
@@ -43,6 +45,7 @@ async function uploadImage(
   image.uploaderIp = ip
   await image.save()
   await bucket.file(image.path).save(file.buffer)
+
   return image
 }
 
