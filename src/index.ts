@@ -1,8 +1,8 @@
 import 'reflect-metadata'
 import { config } from 'dotenv'
-import listen from './app'
 import { createConnection } from 'typeorm'
 config()
+import listen from './app'
 
 createConnection({
   type: 'postgres',

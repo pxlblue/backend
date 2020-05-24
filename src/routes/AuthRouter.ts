@@ -5,6 +5,12 @@ import { User } from '../database/entities/User'
 import argon2, { argon2id } from 'argon2'
 import bodyParser from 'body-parser'
 import moment from 'moment'
+import {
+  sendMail,
+  verifyEmailTemplate,
+  verifyEmailSuccessTemplate,
+} from '../util/MailUtil'
+import { Invite } from '../database/entities/Invite'
 
 const valid_username_regex = /^[a-z0-9]+$/i
 const email_regex = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/
@@ -12,6 +18,17 @@ const email_regex = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|
 const AuthRouter = express.Router()
 
 AuthRouter.use(bodyParser.json())
+
+async function sendVerificationEmail(user: User) {
+  return sendMail(
+    user.email,
+    '[pxl.blue] verify your email',
+    verifyEmailTemplate(
+      user.username,
+      `https://api.pxl.blue/auth/verify_email?k=${user.emailVerificationToken}`
+    )
+  )
+}
 
 AuthRouter.route('/register').post(async (req, res) => {
   let errors = []
@@ -27,6 +44,9 @@ AuthRouter.route('/register').post(async (req, res) => {
   if (!req.body.password) {
     errors.push('please supply a password')
   }
+  if (!req.body.invite) {
+    errors.push('please supply an invitation code')
+  }
   if (req.body.password.length < 6) {
     errors.push('password must be longer than 6 characters')
   }
@@ -35,6 +55,9 @@ AuthRouter.route('/register').post(async (req, res) => {
   }
   if (!req.body.email.match(email_regex)) {
     errors.push('email is not valid')
+  }
+  if (req.body.invite.length !== 40) {
+    errors.push('invitation code is invalid')
   }
   if (errors.length > 0) {
     return res.status(400).json({
@@ -67,6 +90,29 @@ AuthRouter.route('/register').post(async (req, res) => {
       errors,
     })
   }
+
+  let invite = null
+  if (process.env.INVITES_DISABLED !== '1') {
+    invite = await Invite.findOne({
+      where: {
+        invite: req.body.invite,
+      },
+    })
+    if (!invite) {
+      errors.push('invitation code is invalid')
+    }
+    if (invite && invite.redeemed) {
+      errors.push('invitation code has already been redeemed')
+    }
+    if (errors.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'errors',
+        errors,
+      })
+    }
+  }
+
   let user = new User()
   user.username = req.body.username
   user.email = req.body.email
@@ -83,11 +129,91 @@ AuthRouter.route('/register').post(async (req, res) => {
   })
   user.password = hashedPassword
   await user.save()
+  if (process.env.INVITES_DISABLED !== '1') {
+    invite!.redeemed = true
+    invite!.redeemedAt = new Date()
+    invite!.redeemedBy = user.id
+    invite!.redeemedByUsername = user.username
+    await invite!.save()
+  }
+
+  await sendVerificationEmail(user)
 
   return res.json({
     success: true,
     message: 'check your email for more information',
   })
+})
+
+AuthRouter.route('/send_verification_email').post(async (req, res) => {
+  let errors = []
+  if (!req.body) {
+    errors.push('please supply a body')
+  }
+  if (!req.body.email) {
+    errors.push('please supply an email')
+  }
+  if (errors.length > 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'errors',
+      errors,
+    })
+  }
+
+  let user = await User.findOne({
+    where: {
+      lowercaseEmail: req.body.email.toLowerCase(),
+    },
+  })
+  if (!user) {
+    return res.status(200).json({
+      success: true,
+      message:
+        'if a user with that email exists they will receive a new verification email',
+    })
+  }
+
+  if (user.emailVerified) {
+    return res.status(400).json({
+      success: false,
+      message: 'your email is already verified',
+      errors: ['your email is already verified'],
+    })
+  }
+  await sendVerificationEmail(user)
+  return res.status(200).json({
+    success: true,
+    message:
+      'if a user with that email exists they will receive a new verification email',
+  })
+})
+
+AuthRouter.route('/verify_email').get(async (req, res) => {
+  if (!req.query.k) {
+    return res.send('no email verification key')
+  }
+  let user = await User.findOne({
+    where: {
+      emailVerificationToken: req.query.k,
+      emailVerified: false,
+    },
+  })
+  if (!user) {
+    return res.send(
+      'could not find a user with that email verification key. is your account already verified?'
+    )
+  }
+  user.emailVerified = true
+  await user.save()
+  await sendMail(
+    user.email,
+    '[pxl.blue] your email was verified',
+    verifyEmailSuccessTemplate(user.username)
+  )
+  return res.send(
+    'your email was verified successfully! redirecting to <a href="https://pxl.blue">pxl.blue</a> in 5 seconds<script>setTimeout(() =>{window.location.href="https:///pxl.blue";}, 5000)</script>'
+  )
 })
 
 AuthRouter.route('/login').post(async (req, res) => {
@@ -112,7 +238,7 @@ AuthRouter.route('/login').post(async (req, res) => {
     where: {
       [req.body.username.includes('@')
         ? 'lowercaseEmail'
-        : 'lowercaseUsername']: req.body.username,
+        : 'lowercaseUsername']: req.body.username.toLowerCase(),
     },
   })
   if (!user) {
