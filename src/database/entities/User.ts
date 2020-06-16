@@ -65,6 +65,11 @@ export class User extends BaseEntity {
   banned: boolean
 
   @Column({
+    default: '',
+  })
+  banReason: string
+
+  @Column({
     default: 0,
   })
   imageCount: number
@@ -81,6 +86,7 @@ export class User extends BaseEntity {
       moderator: this.moderator,
       admin: this.admin,
       banned: this.banned,
+      banReason: this.banReason,
       imageCount: this.imageCount,
     }
   }

@@ -276,6 +276,13 @@ AuthRouter.route('/login').post(async (req, res) => {
   user.lastLogin = now.toDate()
   await user.save()
 
+  if (user.banned) {
+    return res.status(401).json({
+      success: false,
+      errors: [`your account is banned:\n${user.banReason}`],
+    })
+  }
+
   let session = new Session()
   session.sessionString = createSessionToken()
   session.userId = user.id

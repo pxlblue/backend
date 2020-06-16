@@ -5,6 +5,8 @@ import {
   UsersRouter,
   UploadRouter,
   ProxyRouter,
+  ImagesRouter,
+  InvitesRouter,
 } from './routes'
 import cors from 'cors'
 const app = express()
@@ -17,6 +19,8 @@ app.use(cors())
 app.use('/', RootRouter)
 app.use('/auth', AuthRouter)
 app.use('/users', UsersRouter)
+app.use('/images', ImagesRouter)
+app.use('/invites', InvitesRouter)
 app.use('/upload', UploadRouter)
 app.use('/proxy', ProxyRouter)
 

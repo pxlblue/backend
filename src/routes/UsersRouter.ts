@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { authMiddleware } from '../util/Middleware'
+import { authMiddleware, userIsAdmin } from '../util/Middleware'
 import { Invite } from '../database/entities/Invite'
 import { randomBytes } from '../util/RandomUtil'
 import { User } from '../database/entities/User'
@@ -15,7 +15,41 @@ UsersRouter.use(bodyParser.json())
 
 UsersRouter.use(authMiddleware())
 
+UsersRouter.route('/').get(userIsAdmin(), async (req, res) => {
+  let limit = 50
+  let page = 0
+  if (req.query && req.query.limit) {
+    limit = parseInt(req.query.limit as string)
+  }
+  if (req.query && req.query.page) {
+    page = parseInt(req.query.page as string)
+  }
+  page = page * limit
+  let users = await User.find({
+    order: {
+      id: 'ASC',
+    },
+    take: limit,
+    skip: page,
+  })
+  let count = await User.count()
+  return res.status(200).json({
+    success: true,
+    message: 'users',
+    users: users.map((user) => user.serialize()),
+    total: count,
+    page: page,
+    pages: Math.ceil(count / limit) - 1,
+  })
+})
+
 UsersRouter.route('/@me').get(async (req, res) => {
+  if (req.user.banned) {
+    return res.status(401).json({
+      success: false,
+      errors: [`your account is banned:\n${req.user.banReason}`],
+    })
+  }
   res.status(200).json({
     success: true,
     message: 'ok',
