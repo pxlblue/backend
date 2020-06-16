@@ -69,12 +69,12 @@ AuthRouter.route('/register').post(async (req, res) => {
 
   let users = await User.find({
     where: {
-      lowercaseUsername: req.body.username,
+      lowercaseUsername: req.body.username.toLowerCase(),
     },
   })
   let emails = await User.find({
     where: {
-      lowercaseEmail: req.body.email,
+      lowercaseEmail: req.body.email.toLowerCase(),
     },
   })
   if (users.length > 0) {
