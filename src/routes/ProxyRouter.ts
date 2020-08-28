@@ -4,6 +4,10 @@ import { bucket } from '../util/StorageUtil'
 import rb from 'raw-body'
 const ProxyRouter = express.Router()
 
+ProxyRouter.route('/').get((req, res) => {
+  res.redirect('https://pxl.blue?utm_source=proxy')
+})
+
 ProxyRouter.route(['/:file', '/*/:file']).get(async (req, res) => {
   let image = await Image.findOne({
     where: {
