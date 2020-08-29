@@ -5,7 +5,7 @@ import ImagesRouter from './ImagesRouter'
 import InvitesRouter from './InvitesRouter'
 import UploadRouter from './UploadRouter'
 import ProxyRouter from './ProxyRouter'
-
+import MailRouter from './MailRouter'
 export {
   RootRouter,
   AuthRouter,
@@ -14,4 +14,5 @@ export {
   InvitesRouter,
   UploadRouter,
   ProxyRouter,
+  MailRouter,
 }

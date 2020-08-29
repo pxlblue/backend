@@ -7,6 +7,7 @@ import {
   ProxyRouter,
   ImagesRouter,
   InvitesRouter,
+  MailRouter,
 } from './routes'
 import cors from 'cors'
 const app = express()
@@ -22,6 +23,7 @@ app.use('/users', UsersRouter)
 app.use('/images', ImagesRouter)
 app.use('/invites', InvitesRouter)
 app.use('/upload', UploadRouter)
+app.use('/mail', MailRouter)
 app.use('/proxy', ProxyRouter)
 
 export default async function listen(port: number) {
