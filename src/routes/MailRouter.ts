@@ -120,7 +120,7 @@ MailRouter.route('/alias').get(async (req, res) => {
     `${req.user.lowercaseUsername}@pxl.so`
   )
   return res.status(200).json({
-    sucess: true,
+    success: true,
     message: 'aliases',
     aliases,
   })
