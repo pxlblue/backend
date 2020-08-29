@@ -71,6 +71,11 @@ export class User extends BaseEntity {
   })
   mailAccountCreated: boolean
 
+  @Column({
+    default: 5,
+  })
+  mailAliasLimit: number
+
   @Column({ default: false })
   banned: boolean
 
@@ -97,6 +102,7 @@ export class User extends BaseEntity {
       admin: this.admin,
       mailAccess: this.mailAccess,
       mailAccountCreated: this.mailAccountCreated,
+      mailAliasLimit: this.mailAliasLimit,
       banned: this.banned,
       banReason: this.banReason,
       imageCount: this.imageCount,
