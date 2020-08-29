@@ -182,8 +182,9 @@ MailRouter.route('/alias/create').post(async (req, res) => {
   if (aliases.length >= req.user.mailAliasLimit) {
     return res.status(400).json({
       success: false,
-      message:
+      errors: [
         'reached mail alias limit. please upgrade your mail plan or contact an admin to raise your limit.',
+      ],
     })
   }
   let domain = await mailDb.getDomain(req.body.domain)
