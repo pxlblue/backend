@@ -161,7 +161,7 @@ MailRouter.route('/alias/create').post(async (req, res) => {
   if (blacklisted_usernames.includes(req.body.username)) {
     return res.status(400).json({
       success: false,
-      errors: ['requested username is not blacklisted'],
+      errors: ['requested username is blacklisted'],
     })
   }
   if (!req.body.username.match(valid_username_regex))
