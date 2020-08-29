@@ -191,7 +191,7 @@ MailRouter.route('/alias/create').post(async (req, res) => {
   await mailDb.createAlias(domain, email, dst)
   res.json({
     success: true,
-    message: `alias '${email}' created, redirecting to '${dst}`,
+    message: `alias '${email}' created, redirecting to '${dst}'`,
   })
 })
 
@@ -206,7 +206,7 @@ MailRouter.route('/create_domain').post(userIsAdmin(), async (req, res) => {
     await mailDb.createDomain(req.body.domain)
     return res.status(200).json({
       success: true,
-      message: `domain '${req.body.domain} created successfully`,
+      message: `domain '${req.body.domain}' created successfully`,
     })
   } catch (err) {
     return res.status(400).json({
