@@ -108,10 +108,20 @@ DiscordRouter.route('/redirect').get(async (req, res) => {
       method: 'PATCH',
       body: JSON.stringify({
         nick: user.username,
-        roles,
       }),
       headers: {
         'content-type': 'application/json',
+        authorization: `Bot ${process.env.DISCORD_TOKEN!}`,
+      },
+    }
+  )
+  await fetch(
+    `https://discord.com/api/guilds/${process.env.DISCORD_GUILD!}/members/${
+      userJson.id
+    }/roles/${process.env.DISCORD_ROLE_MEMBER!}`,
+    {
+      method: 'PUT',
+      headers: {
         authorization: `Bot ${process.env.DISCORD_TOKEN!}`,
       },
     }
