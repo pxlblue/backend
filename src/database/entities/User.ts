@@ -89,6 +89,21 @@ export class User extends BaseEntity {
   })
   imageCount: number
 
+  @Column({
+    nullable: true,
+  })
+  discordId?: string
+
+  @Column({
+    nullable: true,
+  })
+  discordTag?: string
+
+  @Column({
+    nullable: true,
+  })
+  discordState?: string
+
   serialize() {
     return {
       id: this.id,
@@ -106,6 +121,8 @@ export class User extends BaseEntity {
       banned: this.banned,
       banReason: this.banReason,
       imageCount: this.imageCount,
+      discordId: this.discordId,
+      discordTag: this.discordTag,
     }
   }
 }

@@ -5,6 +5,8 @@ import { Invite } from '../database/entities/Invite'
 import { randomBytes } from '../util/RandomUtil'
 import { User } from '../database/entities/User'
 import bodyParser from 'body-parser'
+import { Image } from '../database/entities/Image'
+import { bucket } from '../util/StorageUtil'
 
 const valid_username_regex = /^[a-z0-9]+$/i
 const email_regex = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/
@@ -59,16 +61,17 @@ UsersRouter.route('/@me').get(async (req, res) => {
 
 UsersRouter.route('/@me/invites')
   .get(async (req, res) => {
+    let user = req.user
     let invites = await Invite.find({
       where: {
-        creator: req.user.id,
+        creator: user.id,
       },
     })
     return res.status(200).json({
       success: true,
       message: 'ok',
       invites: invites.map((invite) => invite.serialize()),
-      canCreateInvites: req.user.admin || req.user.moderator,
+      canCreateInvites: user.admin || user.moderator,
     })
   })
   .post(async (req, res) => {
@@ -95,6 +98,76 @@ UsersRouter.route('/@me/invites')
       invite: invite.serialize(),
     })
   })
+
+UsersRouter.route('/@me/images').get(async (req, res) => {
+  let user = req.user
+  let limit = 50
+  let page = 0
+  let order: 'ASC' | 'DESC' = 'ASC'
+  if (req.query && req.query.limit) {
+    limit = parseInt(req.query.limit as string)
+  }
+  if (req.query && req.query.page) {
+    page = parseInt(req.query.page as string)
+  }
+  if (req.query && req.query.order === 'DESC') order = 'DESC'
+  page = page * limit
+  let images = await Image.find({
+    order: {
+      id: order,
+    },
+    where: {
+      uploader: user.id,
+      deleted: false,
+    },
+    take: limit,
+    skip: page,
+  })
+  let count = await Image.count({
+    where: {
+      uploader: user.id,
+      deleted: false,
+    },
+  })
+  return res.status(200).json({
+    success: true,
+    message: 'images',
+    images: images.map((image) => image.serialize()),
+    total: count,
+    page: page,
+    pages: Math.ceil(count / limit) - 1,
+  })
+})
+
+UsersRouter.route('/@me/images/nuke').post(async (req, res) => {
+  let user = req.user
+  let images = await Image.find({
+    where: {
+      uploader: user.id,
+      deleted: false,
+    },
+  })
+  Promise.all(
+    images.map(async (image) => {
+      await bucket.file(image.path).delete()
+      image.deleted = true
+      image.deletionReason = 'USER'
+      await image.save()
+    })
+  ).then(async () => {
+    user.imageCount = await Image.count({
+      where: {
+        uploader: user.id,
+        deleted: false,
+      },
+    })
+    await user.save()
+  })
+  return res.status(200).json({
+    success: true,
+    message: 'your images have been queued for deletion',
+  })
+})
 
 const BASE_UPLOADER_CONFIG = {
   Version: '13.1.0',
