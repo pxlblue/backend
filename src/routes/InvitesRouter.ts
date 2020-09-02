@@ -3,8 +3,8 @@ import express from 'express'
 import { authMiddleware, userIsAdmin } from '../util/Middleware'
 import { Invite } from '../database/entities/Invite'
 import bodyParser from 'body-parser'
-import { User } from 'src/database/entities/User'
-import { randomBytes } from 'src/util/RandomUtil'
+import { User } from '../database/entities/User'
+import { randomBytes } from '../util/RandomUtil'
 
 const InvitesRouter = express.Router()
 
