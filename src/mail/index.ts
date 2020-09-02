@@ -1,5 +1,5 @@
 import mysql from 'mysql2'
-import { Connection, RowDataPacket } from 'mysql2/promise'
+import { Connection, Pool, RowDataPacket } from 'mysql2/promise'
 
 const conn = mysql.createPool({
   host: process.env.MAIL_HOST,
@@ -20,8 +20,8 @@ conn.connect((err) => {
 })
 
 class MailDb {
-  connection: Connection
-  constructor(connection: Connection) {
+  connection: Pool
+  constructor(connection: Pool) {
     this.connection = connection
   }
 
