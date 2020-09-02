@@ -9,6 +9,7 @@ import {
   InvitesRouter,
   MailRouter,
   DiscordRouter,
+  DomainRouter,
 } from './routes'
 import cors from 'cors'
 const app = express()
@@ -27,7 +28,7 @@ app.use('/upload', UploadRouter)
 app.use('/mail', MailRouter)
 app.use('/proxy', ProxyRouter)
 app.use('/discord', DiscordRouter)
-
+app.use('/domains', DomainRouter)
 export default async function listen(port: number) {
   return new Promise((resolve, reject) => {
     app.listen(port, resolve)

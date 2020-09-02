@@ -7,6 +7,7 @@ import UploadRouter from './UploadRouter'
 import ProxyRouter from './ProxyRouter'
 import MailRouter from './MailRouter'
 import DiscordRouter from './DiscordRouter'
+import DomainRouter from './DomainRouter'
 export {
   RootRouter,
   AuthRouter,
@@ -17,4 +18,5 @@ export {
   ProxyRouter,
   MailRouter,
   DiscordRouter,
+  DomainRouter,
 }

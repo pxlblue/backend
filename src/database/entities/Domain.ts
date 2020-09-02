@@ -26,10 +26,10 @@ export class Domain extends BaseEntity {
   system: boolean
 
   @Column()
-  host: string
-
-  @Column()
   ownerId: number
+
+  @Column({ default: false })
+  disabled: boolean
 
   serialize() {
     return {
@@ -37,8 +37,8 @@ export class Domain extends BaseEntity {
       domain: this.domain,
       public: this.public,
       system: this.system,
-      host: this.host,
       ownerId: this.ownerId,
+      disabled: this.disabled,
     }
   }
 }
