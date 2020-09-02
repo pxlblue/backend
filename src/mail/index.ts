@@ -1,12 +1,16 @@
 import mysql from 'mysql2'
 import { Connection, RowDataPacket } from 'mysql2/promise'
 
-const conn = mysql.createConnection({
+const conn = mysql.createPool({
   host: process.env.MAIL_HOST,
   user: process.env.MAIL_USER,
   password: process.env.MAIL_PASS,
   database: process.env.MAIL_DB,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
 })
+
 conn.connect((err) => {
   if (err) {
     console.error('failed to connect to mail db', err)
