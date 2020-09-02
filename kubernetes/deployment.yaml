@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: backend
+  name: backend-deployment
+  namespace: default
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: backend
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - env:
+            - name: PORT
+              value: '3000'
+            - name: TYPEORM_CONNECTION
+              value: postgres
+            - name: TYPEORM_HOST
+              value: 10.89.16.2
+            - name: TYPEORM_USERNAME
+              value: pxl
+            - name: TYPEORM_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: db-password
+                  name: backend-secret
+            - name: TYPEORM_DATABASE
+              value: pxl
+            - name: TYPEORM_PORT
+              value: '5432'
+            - name: TYPEORM_SYNCHRONIZE
+              value: 'true'
+            - name: SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: secret
+                  name: backend-secret
+            - name: EMAIL_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: email-key
+                  name: backend-secret
+            - name: EMAIL_FROM
+              value: noreply@pxl.blue
+            - name: INVITES_DISABLED
+              value: '0'
+            - name: STORAGE_PROJECT
+              value: pxlblue
+            - name: STORAGE_BUCKET
+              value: pxl-storage
+            - name: STORAGE_EMAIL
+              value: storage@pxlblue.iam.gserviceaccount.com
+            - name: STORAGE_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: storage-key
+                  name: backend-secret
+            - name: DISCORD_INVITE
+              value: 'https://discord.gg/GdEWmU8'
+            - name: MAIL_HOST
+              value: whistler.blizzard.to
+            - name: MAIL_USER
+              value: adminuser
+            - name: MAIL_PASS
+              valueFrom:
+                secretKeyRef:
+                  key: mail-pass
+                  name: backend-secret
+            - name: MAIL_DB
+              value: mailserver
+            - name: BASE_URL
+              value: 'https://api.pxl.blue'
+            - name: DISCORD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: discord-token
+                  name: backend-secret
+            - name: DISCORD_CLIENT_ID
+              value: '749963189285945424'
+            - name: DISCORD_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: discord-client-secret
+                  name: backend-secret
+            - name: DISCORD_GUILD
+              value: '712886036312752210'
+            - name: DISCORD_ROLE_MEMBER
+              value: '712889806337867827'
+          image: gcr.io/pxlblue/backend
+          imagePullPolicy: Always
+          name: backend
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+---
+apiVersion: 'v1'
+kind: 'Service'
+metadata:
+  name: backend-deployment-service
+  namespace: default
+  labels:
+    app: backend

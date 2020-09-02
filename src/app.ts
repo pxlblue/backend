@@ -12,10 +12,16 @@ import {
   DomainRouter,
 } from './routes'
 import cors from 'cors'
+import util from 'util'
 const app = express()
 
 app.enable('trust proxy')
 app.disable('x-powered-by')
+
+app.use((req, res, next) => {
+  console.log(util.inspect(req.headers))
+  return next()
+})
 
 app.use(cors())
 
