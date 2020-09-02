@@ -12,6 +12,7 @@ import {
   DomainRouter,
 } from './routes'
 import cors from 'cors'
+import 'express-async-errors'
 const app = express()
 
 app.disable('x-powered-by')
