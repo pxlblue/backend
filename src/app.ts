@@ -12,14 +12,18 @@ import {
   DomainRouter,
 } from './routes'
 import cors from 'cors'
+import os from 'os'
 import 'express-async-errors'
 const app = express()
 
 app.disable('x-powered-by')
 
+const hostname = os.hostname()
 app.use((req, res, next) => {
   let ip = req.headers['cf-connecting-ip'] as string
   req.realIp = ip || req.ip
+
+  res.header('X-Server-Hostname', hostname)
   return next()
 })
 
