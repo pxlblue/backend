@@ -132,6 +132,7 @@ declare global {
     interface Request {
       user: User
       loggedIn: boolean
+      realIp: string
       flash: (clazz: string, message: string) => void
     }
   }

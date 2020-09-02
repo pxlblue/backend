@@ -45,7 +45,7 @@ export function authMiddleware() {
       })
     }
 
-    if (session.ip !== req.ip) {
+    if (session.ip !== req.realIp) {
       await session.remove()
       return res.status(401).json({
         success: false,

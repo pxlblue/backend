@@ -18,7 +18,7 @@ app.disable('x-powered-by')
 
 app.use((req, res, next) => {
   let ip = req.headers['cf-connecting-ip'] as string
-  req.ip = ip
+  req.realIp = ip || req.ip
   return next()
 })
 

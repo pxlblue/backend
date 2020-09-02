@@ -119,7 +119,7 @@ AuthRouter.route('/register').post(async (req, res) => {
   user.lowercaseUsername = user.username.toLowerCase()
   user.lowercaseEmail = user.email.toLowerCase()
   user.registrationDate = new Date()
-  user.registrationIp = req.ip
+  user.registrationIp = req.realIp
   user.usedIps = [user.registrationIp]
   user.uploadKey = randomBytes()
   user.emailVerificationToken = randomBytes()
@@ -268,8 +268,8 @@ AuthRouter.route('/login').post(async (req, res) => {
     })
   }
 
-  if (!user.usedIps.includes(req.ip)) {
-    user.usedIps.push(req.ip)
+  if (!user.usedIps.includes(req.realIp)) {
+    user.usedIps.push(req.realIp)
   }
   let now = moment()
 
@@ -286,7 +286,7 @@ AuthRouter.route('/login').post(async (req, res) => {
   let session = new Session()
   session.sessionString = createSessionToken()
   session.userId = user.id
-  session.ip = req.ip
+  session.ip = req.realIp
   session.rememberMe = false
   session.expiresAt = now.add(8, 'hours').toDate()
   await session.save()

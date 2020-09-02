@@ -69,7 +69,7 @@ UploadRouter.route('/sharex').post(upload.single('file'), async (req, res) => {
       )
   }
   let host = req.body.host || 'i.pxl.blue'
-  let image = await uploadImage(host, user, req.file, false, req.ip)
+  let image = await uploadImage(host, user, req.file, false, req.realIp)
   res.status(200).send(image.url)
 })
 
