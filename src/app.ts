@@ -12,14 +12,13 @@ import {
   DomainRouter,
 } from './routes'
 import cors from 'cors'
-import util from 'util'
 const app = express()
 
-app.enable('trust proxy')
 app.disable('x-powered-by')
 
 app.use((req, res, next) => {
-  console.log(util.inspect(req.headers))
+  let ip = req.headers['cf-connecting-ip'] as string
+  req.ip = ip
   return next()
 })
 
