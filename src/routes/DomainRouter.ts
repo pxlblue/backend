@@ -21,9 +21,16 @@ DomainRouter.route('/').get(async (req, res) => {
       disabled: false,
     },
   })
+  let count = await Domain.count({
+    where: {
+      public: true,
+      disabled: false,
+    },
+  })
   return res.status(200).json({
     success: true,
     message: 'domains',
+    count,
     domains: domains.map((domain) => domain.serialize()),
   })
 })

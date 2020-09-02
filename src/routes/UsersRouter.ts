@@ -185,15 +185,17 @@ const BASE_UPLOADER_CONFIG = {
 UsersRouter.route('/@me/generate_sharex_config').get(async (req, res) => {
   let cfg = {
     ...BASE_UPLOADER_CONFIG,
-    Name: `pxl.blue (${req.user.username})`,
+    Name: `pxl.blue (${req.user.username} on ${
+      req.query.domain || 'i.pxl.blue'
+    })`,
     Arguments: {
       key: req.user.uploadKey,
-      host: 'i.pxl.blue',
+      host: req.query.domain || 'i.pxl.blue',
     },
   }
   res.setHeader(
     'Content-Disposition',
-    `attachment; filename=pxl.blue_${req.user.username}.sxcu`
+    `attachment; filename=pxl.blue_${req.user.username}_on_${cfg.Arguments.host}.sxcu`
   )
   res.setHeader('Content-Transfer-Encoding', 'binary')
   res.setHeader('Content-Type', 'application/octet-stream')
