@@ -42,7 +42,7 @@ InvitesRouter.route('/').get(userIsAdmin(), async (req, res) => {
 })
 
 InvitesRouter.route('/wave').post(userIsAdmin(), async (req, res) => {
-  let maxUid = parseInt((req.query.maxUid as string) || '10000')
+  let maxUid = parseInt((req.body.maxUid as string) || '10000')
   let users = await User.find({
     where: {
       id: `< ${maxUid}`,
