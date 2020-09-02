@@ -1,7 +1,11 @@
-import mysql from 'mysql2'
-import { Connection, Pool, RowDataPacket } from 'mysql2/promise'
+import mysql, {
+  Connection,
+  Pool,
+  PoolConnection,
+  RowDataPacket,
+} from 'mysql2/promise'
 
-const conn = mysql.createPool({
+const pool = mysql.createPool({
   host: process.env.MAIL_HOST,
   user: process.env.MAIL_USER,
   password: process.env.MAIL_PASS,
@@ -11,20 +15,14 @@ const conn = mysql.createPool({
   queueLimit: 0,
 })
 
-conn.connect((err) => {
-  if (err) {
-    console.error('failed to connect to mail db', err)
-    process.exit(1)
-  }
-  console.log('connected to mail db')
-})
-
 class MailDb {
-  connection: Pool
-  constructor(connection: Pool) {
-    this.connection = connection
+  connection: PoolConnection
+  constructor(pool: Pool) {
+    this.init(pool)
   }
-
+  async init(pool: Pool) {
+    this.connection = await pool.getConnection()
+  }
   async mailboxExists(email: string) {
     const [
       results,
@@ -112,6 +110,5 @@ class MailDb {
   }
 }
 
-const connection = conn.promise()
-const mailDb = new MailDb(connection)
+const mailDb = new MailDb(pool)
 export default mailDb
