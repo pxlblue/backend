@@ -34,6 +34,29 @@ app.use('/mail', MailRouter)
 app.use('/proxy', ProxyRouter)
 app.use('/discord', DiscordRouter)
 app.use('/domains', DomainRouter)
+
+app.use((req, res, next) => {
+  return res.status(404).json({
+    success: false,
+    errors: ['page not found'],
+  })
+})
+
+app.use(
+  (
+    err: Error,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
+    return res.status(500).json({
+      success: false,
+      message: 'internal server error',
+      errors: [err.stack || err.toString()],
+    })
+  }
+)
+
 export default async function listen(port: number) {
   return new Promise((resolve, reject) => {
     app.listen(port, resolve)
