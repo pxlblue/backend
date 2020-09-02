@@ -14,11 +14,23 @@ import {
 import cors from 'cors'
 import os from 'os'
 import 'express-async-errors'
+import { createLogger } from '@logdna/logger'
+import morgan from 'morgan'
 const app = express()
 
 app.disable('x-powered-by')
 
 const hostname = os.hostname()
+const logger = createLogger(process.env.LOGDNA_INGESTION_KEY!, {
+  hostname,
+})
+const stream = {
+  write: (message: any) => {
+    console.log(message)
+    logger.info(message)
+  },
+}
+
 app.use((req, res, next) => {
   let ip = req.headers['cf-connecting-ip'] as string
   req.realIp = ip || req.ip
@@ -26,6 +38,18 @@ app.use((req, res, next) => {
   res.header('X-Server-Hostname', hostname)
   return next()
 })
+morgan.token(
+  'realip',
+  (req: express.Request, res: express.Response) => req.realIp
+)
+app.use(
+  morgan(
+    ':realip - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"',
+    {
+      stream,
+    }
+  )
+)
 
 app.use(cors())
 

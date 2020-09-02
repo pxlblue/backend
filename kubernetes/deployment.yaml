@@ -97,6 +97,11 @@ spec:
               value: '712886036312752210'
             - name: DISCORD_ROLE_MEMBER
               value: '712889806337867827'
+            - name: LOGDNA_INGESTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: logdna-ingestion-key
+                  name: backend-secret
           image: gcr.io/pxlblue/backend
           imagePullPolicy: Always
           name: backend
@@ -119,3 +124,97 @@ spec:
   selector:
     app: 'backend'
   type: 'NodePort'
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: circuit-breaker
+spec:
+  circuitBreaker:
+    expression: LatencyAtQuantileMS(50.0) > 100 || ResponseCodeRatio(500, 600, 0, 600) > 0.50 || NetworkErrorRatio() > 0.40
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: ratelimit
+spec:
+  rateLimit:
+    average: 20
+    burst: 10
+    period: 1s
+    sourceCriterion:
+      requestHeaderName: CF-Connecting-IP
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: backend-ingressroute-proxy
+  namespace: default
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: PathPrefix(`/`)
+      kind: Rule
+      services:
+        - name: backend-deployment-service
+          port: 3000
+      middlewares:
+        - name: add-proxy
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: backend-ingressroute-proxy-tls
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: PathPrefix(`/`)
+      kind: Rule
+      services:
+        - name: backend-deployment-service
+          port: 3000
+      middlewares:
+        - name: add-proxy
+  tls:
+    secretName: backend-secret-tls
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: backend-ingressroute
+  namespace: default
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`api.pxl.blue`) && PathPrefix(`/`)
+      kind: Rule
+      services:
+        - name: backend-deployment-service
+          port: 3000
+      middlewares:
+        - name: circuit-breaker
+        - name: ratelimit
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: backend-ingressroute-tls
+  namespace: default
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`api.pxl.blue`) && PathPrefix(`/`)
+      kind: Rule
+      services:
+        - name: backend-deployment-service
+          port: 3000
+      middlewares:
+        - name: circuit-breaker
+        - name: ratelimit
+  tls:
+    secretName: backend-secret-tls
