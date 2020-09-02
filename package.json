@@ -8,7 +8,8 @@
     "build:typescript": "tsc -p tsconfig.production.json",
     "start": "node dist/index.js",
     "dev": "ts-node-dev src/index.ts",
-    "build:win": "docker build -t gcr.io/pxlblue/backend:latest . && docker push gcr.io/pxlblue/backend:latest  "
+    "build:win": "docker build -t gcr.io/pxlblue/backend:latest . && docker push gcr.io/pxlblue/backend:latest",
+    "traefik": "kubectl port-forward $(kubectl get pods --selector \"app.kubernetes.io/name=traefik\" --output=name) 9000:9000"
   },
   "devDependencies": {
     "@types/body-parser": "^1.19.0",
