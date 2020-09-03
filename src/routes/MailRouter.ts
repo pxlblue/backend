@@ -6,7 +6,7 @@ import { randomBytes } from '../util/RandomUtil'
 import { User } from '../database/entities/User'
 import bodyParser from 'body-parser'
 import mailDb from '../mail'
-import { RowDataPacket } from 'mysql2'
+import moment from 'moment'
 const valid_username_regex = /^[a-z0-9\-]+$/i
 const blacklisted_domains = ['pxl.so', 'whistler', 'whistler.blizzard.to']
 // mostly RFC2142
@@ -33,6 +33,20 @@ const MailRouter = express.Router()
 MailRouter.use(bodyParser.json())
 
 MailRouter.use(authMiddleware())
+
+MailRouter.use(async (req, res, next) => {
+  if (req.user.mailAccess && req.user.mailAccessExpires !== null) {
+    if (moment().isAfter(req.user.mailAccessExpires)) {
+      req.user.mailAccess = false
+      await req.user.save()
+      await mailDb.setPassword(
+        `${req.user.lowercaseUsername}@pxl.so`,
+        'nooooooooobad'
+      )
+    }
+  }
+  return next()
+})
 
 MailRouter.route('/create').post(async (req, res) => {
   if (!req.user.mailAccess) {

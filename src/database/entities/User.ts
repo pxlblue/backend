@@ -6,6 +6,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm'
+import moment from 'moment'
 @Entity()
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
@@ -67,6 +68,12 @@ export class User extends BaseEntity {
   mailAccess: boolean
 
   @Column({
+    type: 'timestamp with time zone',
+    nullable: true,
+  })
+  mailAccessExpires: Date
+
+  @Column({
     default: false,
   })
   mailAccountCreated: boolean
@@ -116,6 +123,11 @@ export class User extends BaseEntity {
       moderator: this.moderator,
       admin: this.admin,
       mailAccess: this.mailAccess,
+      mailAccessExpires: this.mailAccessExpires,
+      mailAccessExpiresFriendly:
+        this.mailAccessExpires === null
+          ? 'Never'
+          : moment(this.mailAccessExpires).format('MMMM Do YYYY, h:mm:ss a'),
       mailAccountCreated: this.mailAccountCreated,
       mailAliasLimit: this.mailAliasLimit,
       banned: this.banned,
