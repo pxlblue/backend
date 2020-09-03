@@ -5,6 +5,7 @@ import { Invite } from '../database/entities/Invite'
 import bodyParser from 'body-parser'
 import { User } from '../database/entities/User'
 import { randomBytes } from '../util/RandomUtil'
+import { LessThanOrEqual } from 'typeorm'
 
 const InvitesRouter = express.Router()
 
@@ -45,7 +46,7 @@ InvitesRouter.route('/wave').post(userIsAdmin(), async (req, res) => {
   let maxUid = parseInt((req.body.maxUid as string) || '10000')
   let users = await User.find({
     where: {
-      id: `< ${maxUid}`,
+      id: LessThanOrEqual(maxUid),
     },
   })
   users.forEach(async (user) => {
