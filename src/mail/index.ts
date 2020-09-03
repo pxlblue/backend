@@ -11,7 +11,7 @@ const pool = mysql.createPool({
   password: process.env.MAIL_PASS,
   database: process.env.MAIL_DB,
   waitForConnections: true,
-  connectionLimit: 10,
+  connectionLimit: 3,
   queueLimit: 0,
 })
 
