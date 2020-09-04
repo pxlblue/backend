@@ -111,6 +111,10 @@ export class User extends BaseEntity {
   })
   discordState?: string
 
+  @Column({
+    default: false,
+  })
+  settings_discordLink: boolean
   serialize() {
     return {
       id: this.id,
@@ -135,6 +139,8 @@ export class User extends BaseEntity {
       imageCount: this.imageCount,
       discordId: this.discordId,
       discordTag: this.discordTag,
+
+      settings_discordLink: this.settings_discordLink,
     }
   }
 }
