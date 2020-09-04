@@ -70,9 +70,7 @@ UploadRouter.route('/sharex').post(upload.single('file'), async (req, res) => {
   }
   let host = req.body.host || 'i.pxl.blue'
   let image = await uploadImage(host, user, req.file, false, req.realIp)
-  res
-    .status(200)
-    .send((req.user.settings_discordLink ? '\u200b' : '') + image.url)
+  res.status(200).send((user.settings_discordLink ? '\u200b' : '') + image.url)
 })
 
 export default UploadRouter
