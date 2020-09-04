@@ -45,23 +45,46 @@ UsersRouter.route('/').get(userIsAdmin(), async (req, res) => {
   })
 })
 
-UsersRouter.route('/@me').get(async (req, res) => {
+UsersRouter.route('/:id').get(async (req, res) => {
   if (req.user.banned) {
     return res.status(401).json({
       success: false,
       errors: [`your account is banned:\n${req.user.banReason}`],
     })
   }
+  let user = req.user
+  if (req.params.id !== '@me' && req.user.admin) {
+    user = (await User.findOne({
+      where: {
+        id: req.params.id,
+      },
+    })) as User
+    if (!user)
+      return res
+        .status(400)
+        .json({ success: false, errors: ['that user does not exist'] })
+  }
   res.status(200).json({
     success: true,
     message: 'ok',
-    user: req.user.serialize(),
+    user: user.serialize(),
   })
 })
 
-UsersRouter.route('/@me/invites')
+UsersRouter.route('/:id/invites')
   .get(async (req, res) => {
     let user = req.user
+    if (req.params.id !== '@me' && req.user.admin) {
+      user = (await User.findOne({
+        where: {
+          id: req.params.id,
+        },
+      })) as User
+      if (!user)
+        return res
+          .status(400)
+          .json({ success: false, errors: ['that user does not exist'] })
+    }
     let invites = await Invite.find({
       where: {
         creator: user.id,
@@ -99,8 +122,19 @@ UsersRouter.route('/@me/invites')
     })
   })
 
-UsersRouter.route('/@me/images').get(async (req, res) => {
+UsersRouter.route('/:id/images').get(async (req, res) => {
   let user = req.user
+  if (req.params.id !== '@me' && req.user.admin) {
+    user = (await User.findOne({
+      where: {
+        id: req.params.id,
+      },
+    })) as User
+    if (!user)
+      return res
+        .status(400)
+        .json({ success: false, errors: ['that user does not exist'] })
+  }
   let limit = 50
   let page = 0
   let order: 'ASC' | 'DESC' = 'ASC'
@@ -139,8 +173,19 @@ UsersRouter.route('/@me/images').get(async (req, res) => {
   })
 })
 
-UsersRouter.route('/@me/images/nuke').post(async (req, res) => {
+UsersRouter.route('/:id/images/nuke').post(async (req, res) => {
   let user = req.user
+  if (req.params.id !== '@me' && req.user.admin) {
+    user = (await User.findOne({
+      where: {
+        id: req.params.id,
+      },
+    })) as User
+    if (!user)
+      return res
+        .status(400)
+        .json({ success: false, errors: ['that user does not exist'] })
+  }
   let images = await Image.find({
     where: {
       uploader: user.id,
