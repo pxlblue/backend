@@ -79,7 +79,7 @@ UsersRouter.route('/:id')
     let keysModified = []
     Object.keys(req.body).forEach((key) => {
       if (!userWhitelist.includes(key)) return
-      ;(req.user as any)[key] = req.body
+      ;(req.user as any)[key] = req.body[key]
       keysModified.push(key)
     })
     await req.user.save()
