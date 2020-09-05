@@ -55,11 +55,11 @@ VoucherRouter.route('/redeem').post(async (req, res) => {
   })
 })
 
-VoucherRouter.route('/create/mail1m').post(userIsAdmin(), async (req, res) => {
+VoucherRouter.route('/create').post(userIsAdmin(), async (req, res) => {
   let voucher = new Voucher()
-  voucher.type = 'mail'
-  voucher.voucher = `${voucher.type}_1m_${randomBytes(24)}`
-  voucher.duration = '30 days'
+  voucher.type = req.body.type
+  voucher.voucher = `${voucher.type}_${req.body.time}_${randomBytes(24)}`
+  voucher.duration = req.body.duration
   await voucher.save()
 
   res.json({ success: true, message: voucher.voucher })
