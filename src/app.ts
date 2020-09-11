@@ -25,6 +25,13 @@ const hostname = os.hostname()
 const logger = createLogger(process.env.LOGDNA_INGESTION_KEY!, {
   hostname,
 })
+
+logger.on('error', (...args) => {
+  console.error(
+    'some error occurred with LogDNA and we caught it so this shit doesnt kill itself'
+  )
+})
+
 const stream = {
   write: (message: any) => {
     console.log(message)
