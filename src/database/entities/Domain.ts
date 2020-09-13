@@ -31,6 +31,11 @@ export class Domain extends BaseEntity {
   @Column({ default: false })
   disabled: boolean
 
+  @Column({
+    default: true,
+  })
+  wildcard: boolean
+
   serialize() {
     return {
       id: this.id,
@@ -39,6 +44,7 @@ export class Domain extends BaseEntity {
       system: this.system,
       ownerId: this.ownerId,
       disabled: this.disabled,
+      wildcard: this.wildcard,
     }
   }
 }
