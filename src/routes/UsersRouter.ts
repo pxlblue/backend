@@ -233,14 +233,17 @@ const BASE_UPLOADER_CONFIG = {
   Name: 'pxl.blue (%username%)',
   DestinationType: 'ImageUploader, FileUploader',
   RequestMethod: 'POST',
-  RequestURL: 'https://api.pxl.blue/upload/sharex',
+  RequestURL: 'https://api.pxl.blue/upload/extra',
   Body: 'MultipartFormData',
   Arguments: {
     key: '%key%',
     host: 'i.pxl.blue',
   },
   FileFormName: 'file',
+  URL: '$json:url$',
+  DeletionURL: '$json:deletionUrl$',
 }
+
 UsersRouter.route('/@me/generate_sharex_config').get(async (req, res) => {
   let cfg = {
     ...BASE_UPLOADER_CONFIG,
