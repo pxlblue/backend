@@ -9,6 +9,7 @@ import MailRouter from './MailRouter'
 import DiscordRouter from './DiscordRouter'
 import DomainRouter from './DomainRouter'
 import VoucherRouter from './VoucherRouter'
+import MatrixRouter from './MatrixRouter'
 export {
   RootRouter,
   AuthRouter,
@@ -21,4 +22,5 @@ export {
   DiscordRouter,
   DomainRouter,
   VoucherRouter,
+  MatrixRouter,
 }

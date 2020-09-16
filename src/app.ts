@@ -11,6 +11,7 @@ import {
   DiscordRouter,
   DomainRouter,
   VoucherRouter,
+  MatrixRouter,
 } from './routes'
 import cors from 'cors'
 import os from 'os'
@@ -71,6 +72,7 @@ app.use('/proxy', ProxyRouter)
 app.use('/discord', DiscordRouter)
 app.use('/domains', DomainRouter)
 app.use('/voucher', VoucherRouter)
+app.use('/matrix', MatrixRouter)
 
 app.use((req, res, next) => {
   return res.status(404).json({
