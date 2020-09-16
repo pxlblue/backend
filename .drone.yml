@@ -4,6 +4,11 @@ name: default
 
 steps:
   - name: build
+    image: node:14-alpine
+    commands:
+      - yarn install
+      - yarn build
+  - name: publish
     image: plugins/docker
     settings:
       username: _json_key
@@ -11,4 +16,4 @@ steps:
         from_secret: gcr_key
       registry: gcr.io
       repo: gcr.io/pxlblue/backend
-      tags: ${DRONE_COMMIT}
+      tags: ["${DRONE_COMMIT}", "latest"]
