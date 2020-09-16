@@ -8,6 +8,6 @@ steps:
     settings:
       username: _json_key
       password:
-        from_secret: GCR_KEY
+        from_secret: gcr_key
       repo: gcr.io/pxlblue/backend
       tags: ${DRONE_COMMIT}

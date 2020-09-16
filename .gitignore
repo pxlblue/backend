@@ -121,3 +121,6 @@ dist
 k8s/
 realk8s/secrets.yaml
 realk8s/cert.pem
+
+# Something in my dev environment keeps making this file and I dont want it to be tracked by git
+config.yml
