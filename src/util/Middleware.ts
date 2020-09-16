@@ -11,18 +11,18 @@ export function authMiddleware() {
   ) {
     req.loggedIn = false
     // find session header
-    let sessionToken = null
+    let sessionToken: string | undefined
 
     if (req.headers.authorization) {
       sessionToken = req.headers.authorization
     }
     if (req.query && req.query.auth) {
-      sessionToken = req.query.auth
+      sessionToken = req.query.auth as string
     }
     if (req.body && req.body.auth) {
       sessionToken = req.body.auth
     }
-    if (!sessionToken || !sessionToken.startsWith('Bearer ')) {
+    if (!sessionToken) {
       return res.status(401).json({
         success: false,
         message: 'authentication required',
@@ -32,63 +32,107 @@ export function authMiddleware() {
       })
     }
 
-    let session = await Session.findOne({
-      where: {
-        sessionString: sessionToken,
-      },
-    })
-    if (!session) {
-      return res.status(401).json({
-        success: false,
-        message: 'authentication required',
-        errors: ['session not found'],
+    if (sessionToken.startsWith('Bearer ')) {
+      let session = await Session.findOne({
+        where: {
+          sessionString: sessionToken,
+        },
       })
-    }
+      if (!session) {
+        return res.status(401).json({
+          success: false,
+          message: 'authentication required',
+          errors: ['session not found'],
+        })
+      }
 
-    if (session.ip !== req.realIp) {
-      await session.remove()
-      return res.status(401).json({
-        success: false,
-        message: 'authentication required',
-        errors: [
-          'your ip has changed since you last logged in, please log in again',
-        ],
+      if (session.ip !== req.realIp) {
+        await session.remove()
+        return res.status(401).json({
+          success: false,
+          message: 'authentication required',
+          errors: [
+            'your ip has changed since you last logged in, please log in again',
+          ],
+        })
+      }
+
+      let now = moment()
+
+      // check if session expired
+      if (session.expiresAt && moment(session.expiresAt).diff(now) < 0) {
+        await session.remove()
+        return res.status(401).json({
+          success: false,
+          message: 'authentication required',
+          errors: ['your session has expired, please log in again'],
+        })
+      }
+
+      // all valid!
+      let user = await User.findOne({
+        where: {
+          id: session.userId,
+        },
       })
-    }
+      if (!user) {
+        await session.remove()
+        return res.status(401).json({
+          success: false,
+          message: 'authentication required',
+          errors: [
+            'something bad happened when parsing your session, contact an admin',
+          ],
+        })
+      }
 
-    let now = moment()
+      req.user = user
+      req.loggedIn = true
 
-    // check if session expired
-    if (session.expiresAt && moment(session.expiresAt).diff(now) < 0) {
-      await session.remove()
-      return res.status(401).json({
-        success: false,
-        message: 'authentication required',
-        errors: ['your session has expired, please log in again'],
+      return next()
+    } else {
+      if (sessionToken == null || sessionToken == undefined) {
+        // sanity check because it defaults to null in the Model
+        return res.status(401).json({
+          success: false,
+          message: 'authentication required',
+          errors: ['session not found'],
+        })
+      }
+      // assumed its an api key
+      let user = await User.findOne({
+        where: {
+          apiKey: sessionToken,
+        },
       })
+
+      // Api key was invalid, so killing the request here
+      if (!user || user.apiKey == undefined || user.apiKey == null) {
+        return res.status(401).json({
+          success: false,
+          message: 'authentication required',
+          errors: ['session not found'],
+        })
+      }
+
+      // Check to ensure the user making the req with api key
+      // matches one of the users used ips if user has setting enabled
+      if (user.settings_apiIpSecurity && !user.usedIps.includes(req.ip)) {
+        return res.status(401).json({
+          success: false,
+          message: 'authentication required',
+          errors: [
+            'the ip you are connecting with has not been used with the account. please login with username/password before using your API key.',
+          ],
+        })
+      }
+
+      // everything's good, set members on the req and go
+      req.user = user
+      req.loggedIn = true
+
+      return next()
     }
-
-    // all valid!
-    let user = await User.findOne({
-      where: {
-        id: session.userId,
-      },
-    })
-    if (!user) {
-      await session.remove()
-      return res.status(401).json({
-        success: false,
-        message: 'authentication required',
-        errors: [
-          'something bad happened when parsing your session, contact an admin',
-        ],
-      })
-    }
-
-    req.user = user
-    req.loggedIn = true
-
-    return next()
   }
 }
 

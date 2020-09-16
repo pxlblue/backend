@@ -44,6 +44,11 @@ export class User extends BaseEntity {
   @Column()
   uploadKey: string
 
+  @Column({
+    nullable: true,
+  })
+  apiKey?: string
+
   @Column()
   registrationIp: string
 
@@ -115,6 +120,12 @@ export class User extends BaseEntity {
     default: false,
   })
   settings_discordLink: boolean
+
+  @Column({
+    default: true,
+  })
+  settings_apiIpSecurity: boolean
+
   serialize() {
     return {
       id: this.id,
@@ -123,6 +134,7 @@ export class User extends BaseEntity {
       registrationDate: this.registrationDate,
       lastLogin: this.lastLogin,
       uploadKey: this.uploadKey,
+      apiKey: this.apiKey,
       registrationIp: this.registrationIp,
       moderator: this.moderator,
       admin: this.admin,
@@ -141,6 +153,7 @@ export class User extends BaseEntity {
       discordTag: this.discordTag,
 
       settings_discordLink: this.settings_discordLink,
+      settings_apiIpSecurity: this.settings_apiIpSecurity,
     }
   }
 }

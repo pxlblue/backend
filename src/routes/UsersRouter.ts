@@ -45,7 +45,7 @@ UsersRouter.route('/').get(userIsAdmin(), async (req, res) => {
   })
 })
 
-let userWhitelist = ['settings_discordLink']
+let userWhitelist = ['settings_discordLink', 'settings_apiIpSecurity'] //TODO: look into just .startsWith('settings_') instead of a whitelist
 
 UsersRouter.route('/:id')
   .get(async (req, res) => {
@@ -225,6 +225,35 @@ UsersRouter.route('/:id/images/nuke').post(async (req, res) => {
   return res.status(200).json({
     success: true,
     message: 'your images have been queued for deletion',
+  })
+})
+
+UsersRouter.route('/:id/keys/:key/regenerate').post(async (req, res) => {
+  let user = req.user
+  if (req.params.id !== '@me' && req.user.admin) {
+    user = (await User.findOne({
+      where: {
+        id: req.params.id,
+      },
+    })) as User
+    if (!user)
+      return res
+        .status(400)
+        .json({ success: false, errors: ['that user does not exist'] })
+  }
+
+  if (!['uploadKey', 'apiKey'].includes(req.params.key))
+    return res.status(400).json({
+      success: false,
+      errors: [`you cannot regenerate key of type "${req.params.key}"`],
+    })
+  let key = randomBytes()
+  user[req.params.key as 'uploadKey' | 'apiKey'] = key //TODO: typescript is kind of annoying, and i should likely find a better way to do this
+  await user.save()
+  return res.status(200).json({
+    success: true,
+    message: `successfully regenerated key of type "${req.params.key}"`,
+    newValue: key,
   })
 })
 
