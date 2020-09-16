@@ -27,10 +27,10 @@ steps:
     environment:
       K8S_CFGB64:
         from_secret: k8s_config_b64
-      GCR_KEY:
-        from_secret: gcr_key
+      GKE_KEY:
+        from_secret: k8s_gke_key
     commands:
-      - echo $GCR_KEY > service-account.json
+      - echo $GKE_KEY | base64 -d > service-account.json
       - echo $K8S_CFGB64 | base64 -d > kubeconfig.yaml
       - cat kubeconfig.yaml
       - export GOOGLE_APPLICATION_CREDENTIALS=service-account.json

@@ -124,3 +124,4 @@ realk8s/cert.pem
 
 # Something in my dev environment keeps making this file and I dont want it to be tracked by git
 config.yml
+kubernetes/secret.json
