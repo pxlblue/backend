@@ -1,0 +1,13 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: build
+    image: plugins/docker
+    settings:
+      username: _json_key
+      password:
+        from_secret: GCR_KEY
+      repo: gcr.io/pxlblue/backend
+      tags: ${DRONE_COMMIT}

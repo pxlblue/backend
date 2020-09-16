@@ -116,6 +116,7 @@ dist
 .pnp.*
 
 .env*
+.secrets
 
 k8s/
 realk8s/secrets.yaml
