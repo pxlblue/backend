@@ -7,7 +7,6 @@ steps:
     image: plugins/docker
     settings:
       username: "_json_key"
-      password:
-        from_secret: gcr_key
+      password: "aaaaa"
       repo: gcr.io/pxlblue/backend
       tags: ${DRONE_COMMIT}
