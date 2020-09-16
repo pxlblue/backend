@@ -2,13 +2,30 @@ import { Request, Response, NextFunction } from 'express'
 import { Session } from '../database/entities/Session'
 import moment from 'moment'
 import { User } from '../database/entities/User'
+import { URL } from 'url'
 
-export function authMiddleware() {
+export function authMiddleware(whitelist?: (string | RegExp)[]) {
   return async function middleware(
     req: Request,
     res: Response,
     next: NextFunction
   ) {
+    // Can't access req.route here, so regexes + string checking must suffice
+    if (Array.isArray(whitelist)) {
+      let url = new URL(`https://api.pxl.blue${req.url}`).pathname
+      for (let item of whitelist) {
+        if (item instanceof RegExp) {
+          if (url.match(item)) {
+            return next()
+          }
+        } else if (typeof item === 'string') {
+          if (url === item) {
+            return next()
+          }
+        }
+      }
+      // request did not match whitelist, so proceed to check auth
+    }
     req.loggedIn = false
     // find session header
     let sessionToken: string | undefined
