@@ -24,9 +24,16 @@ steps:
         from_secret: k8s_server
       kubernetes_cert:
         from_secret: k8s_cert
-      kubernetes_token:
-        from_secret: k8s_token
+    environment:
+      K8S_CFGB64:
+        from_secret: k8s_config_b64
+      GCR_KEY:
+        from_secret: gcr_key
+      GOOGLE_APPLICATION_CREDENTIALS: service-account.json
+      KUBECONFIG: kubeconfig.yaml
     commands:
-      - kubectl config set-context default --cluster=default --user=default --namespace=production
+      - echo $GCR_KEY > service-account.json
+      - echo $K8S_CFGB64 > kubeconfig.yaml
+      - kubectl config set-context default --cluster=gke_pxlblue_us-central1-c_pxl-blue --user=gke_pxlblue_us-central1-c_pxl-blue --namespace=production
       - kubectl config use-context default
       - kubectl apply -f kubernetes/deployment.yaml
