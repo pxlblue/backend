@@ -34,6 +34,7 @@ steps:
     commands:
       - echo $GCR_KEY > service-account.json
       - echo $K8S_CFGB64 | base64 -d > kubeconfig.yaml
-      - kubectl config set-context default --cluster=gke_pxlblue_us-central1-c_pxl-blue --user=gke_pxlblue_us-central1-c_pxl-blue --namespace=production
-      - kubectl config use-context default
+      - kubectl config set-context gke --cluster=gke_pxlblue_us-central1-c_pxl-blue --user=gke_pxlblue_us-central1-c_pxl-blue --namespace=production
+      - kubectl config use-context gke
+      - kubectl get pods
       - kubectl apply -f kubernetes/deployment.yaml
