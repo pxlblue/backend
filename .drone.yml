@@ -27,6 +27,6 @@ steps:
       kubernetes_token:
         from_secret: k8s_token
     commands:
-      - kubectl config set-context production
+      - kubectl config set-context production --cluster=default --user=default
       - kubectl config use-context production
       - kubectl apply -f kubernetes/deployment.yaml
