@@ -82,7 +82,7 @@ UploadRouter.route('/extra').post(upload.single('file'), async (req, res) => {
     image,
     url: (user.settings_discordLink ? '\u200b' : '') + image.url, // preferable to use this due to user settings affecting it
     rawUrl: image.url,
-    deletionUrl: `${process.env.BASE_URL}/images/${image.path}?k=${image.deletionKey}`,
+    deletionUrl: `${process.env.BASE_URL}/images/${image.path}/delete?k=${image.deletionKey}`,
   })
 })
 
