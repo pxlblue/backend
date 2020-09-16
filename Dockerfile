@@ -6,7 +6,7 @@ COPY package.json .
 
 RUN yarn install --production --ignore-scripts --prefer-offline
 
-COPY dist/ .
+COPY dist/ ./dist
 
 EXPOSE 3000
 
