@@ -1,6 +1,7 @@
 import 'reflect-metadata'
 import { config } from 'dotenv'
 import { createConnection } from 'typeorm'
+require('express-async-errors')
 config()
 import listen from './app'
 

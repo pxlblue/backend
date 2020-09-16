@@ -14,7 +14,6 @@ import {
 } from './routes'
 import cors from 'cors'
 import os from 'os'
-import 'express-async-errors'
 import { createLogger } from '@logdna/logger'
 import morgan from 'morgan'
 const app = express()
@@ -90,7 +89,8 @@ app.use(
     return res.status(500).json({
       success: false,
       message: 'internal server error',
-      errors: [err.stack || err.toString()],
+      errors: [err.toString()],
+      stack: err.stack,
     })
   }
 )
