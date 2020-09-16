@@ -1,60 +1,98 @@
-apiVersion: apps/v1
-kind: Deployment
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: backend-ingress
+spec:
+  tls:
+    - secretName: backend-secret-tls
+  rules:
+    - http:
+        paths:
+          - path: /*
+            backend:
+              serviceName: backend-service
+              servicePort: 3000
+---
+apiVersion: v1
+kind: Service
 metadata:
   labels:
     app: backend
-  name: backend-deployment
-  namespace: default
+  name: backend-service
 spec:
-  replicas: 5
+  type: NodePort
+  ports:
+    - name: http
+      port: 3000
+      protocol: TCP
+      targetPort: 3000
+  selector:
+    app: backend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  labels:
+    app: backend
+spec:
+  replicas: 3
   selector:
     matchLabels:
       app: backend
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
   template:
     metadata:
       labels:
         app: backend
     spec:
       containers:
-        - env:
+        - name: backend
+          image: gcr.io/pxlblue/backend:latest
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "1G"
+              cpu: "250m"
+            limits:
+              memory: "2G"
+              cpu: "500m"
+          ports:
+            - containerPort: 3000
+          env:
             - name: PORT
-              value: '3000'
+              value: "3000"
             - name: TYPEORM_CONNECTION
               value: postgres
             - name: TYPEORM_HOST
-              value: 10.89.16.2
+              value: "10.89.16.2"
             - name: TYPEORM_USERNAME
               value: pxl
             - name: TYPEORM_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  key: db-password
                   name: backend-secret
+                  key: db-password
             - name: TYPEORM_DATABASE
               value: pxl
             - name: TYPEORM_PORT
-              value: '5432'
+              value: "5432"
             - name: TYPEORM_SYNCHRONIZE
-              value: 'true'
+              value: "true"
             - name: SECRET
               valueFrom:
                 secretKeyRef:
-                  key: secret
                   name: backend-secret
+                  key: secret
             - name: EMAIL_KEY
               valueFrom:
                 secretKeyRef:
-                  key: email-key
                   name: backend-secret
+                  key: email-key
             - name: EMAIL_FROM
               value: noreply@pxl.blue
             - name: INVITES_DISABLED
-              value: '0'
+              value: "0"
             - name: STORAGE_PROJECT
               value: pxlblue
             - name: STORAGE_BUCKET
@@ -64,157 +102,47 @@ spec:
             - name: STORAGE_KEY
               valueFrom:
                 secretKeyRef:
-                  key: storage-key
                   name: backend-secret
+                  key: storage-key
             - name: DISCORD_INVITE
-              value: 'https://discord.gg/GdEWmU8'
+              value: "https://discord.gg/GdEWmU8"
             - name: MAIL_HOST
-              value: whistler.blizzard.to
+              value: "whistler.blizzard.to"
             - name: MAIL_USER
-              value: adminuser
+              value: "adminuser"
             - name: MAIL_PASS
               valueFrom:
                 secretKeyRef:
-                  key: mail-pass
                   name: backend-secret
+                  key: mail-pass
             - name: MAIL_DB
-              value: mailserver
+              value: "mailserver"
             - name: BASE_URL
-              value: 'https://api.pxl.blue'
+              value: "https://api.pxl.blue"
             - name: DISCORD_TOKEN
               valueFrom:
                 secretKeyRef:
-                  key: discord-token
                   name: backend-secret
+                  key: discord-token
             - name: DISCORD_CLIENT_ID
-              value: '749963189285945424'
+              value: "749963189285945424"
             - name: DISCORD_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
-                  key: discord-client-secret
                   name: backend-secret
+                  key: discord-client-secret
             - name: DISCORD_GUILD
-              value: '712886036312752210'
+              value: "712886036312752210"
             - name: DISCORD_ROLE_MEMBER
-              value: '712889806337867827'
+              value: "712889806337867827"
             - name: LOGDNA_INGESTION_KEY
               valueFrom:
                 secretKeyRef:
                   key: logdna-ingestion-key
                   name: backend-secret
-          image: gcr.io/pxlblue/backend
-          imagePullPolicy: Always
-          name: backend
-          ports:
-            - containerPort: 3000
-              protocol: TCP
----
-apiVersion: 'v1'
-kind: 'Service'
-metadata:
-  name: backend-deployment-service
-  namespace: default
-  labels:
-    app: backend
-spec:
-  ports:
-    - protocol: 'TCP'
-      port: 3000
-      targetPort: 3000
-  selector:
-    app: 'backend'
-  type: 'NodePort'
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
-metadata:
-  name: circuit-breaker
-spec:
-  circuitBreaker:
-    expression: LatencyAtQuantileMS(50.0) > 100 || ResponseCodeRatio(500, 600, 0, 600) > 0.50 || NetworkErrorRatio() > 0.40
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: Middleware
-metadata:
-  name: ratelimit
-spec:
-  rateLimit:
-    average: 20
-    burst: 10
-    period: 1s
-    sourceCriterion:
-      requestHeaderName: CF-Connecting-IP
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: backend-ingressroute-proxy
-  namespace: default
-spec:
-  entryPoints:
-    - web
-  routes:
-    - match: PathPrefix(`/`)
-      kind: Rule
-      services:
-        - name: backend-deployment-service
-          port: 3000
-      middlewares:
-        - name: add-proxy
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: backend-ingressroute-proxy-tls
-  namespace: default
-spec:
-  entryPoints:
-    - websecure
-  routes:
-    - match: PathPrefix(`/`)
-      kind: Rule
-      services:
-        - name: backend-deployment-service
-          port: 3000
-      middlewares:
-        - name: add-proxy
-  tls:
-    secretName: backend-secret-tls
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: backend-ingressroute
-  namespace: default
-spec:
-  entryPoints:
-    - web
-  routes:
-    - match: Host(`api.pxl.blue`) && PathPrefix(`/`)
-      kind: Rule
-      services:
-        - name: backend-deployment-service
-          port: 3000
-      middlewares:
-        - name: circuit-breaker
-        - name: ratelimit
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: backend-ingressroute-tls
-  namespace: default
-spec:
-  entryPoints:
-    - websecure
-  routes:
-    - match: Host(`api.pxl.blue`) && PathPrefix(`/`)
-      kind: Rule
-      services:
-        - name: backend-deployment-service
-          port: 3000
-      middlewares:
-        - name: circuit-breaker
-        - name: ratelimit
-  tls:
-    secretName: backend-secret-tls
+            - name: SENTRY_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: sentry-dsn
+      terminationGracePeriodSeconds: 60
