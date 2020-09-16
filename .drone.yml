@@ -38,5 +38,4 @@ steps:
       - kubectl config use-context gke
       - kubectl get pods
       - sed -i 's/:latest/:${DRONE_COMMIT}/g' kubernetes/deployment.yaml # Likely I should use kubectl patch, but I don't know how and i just want this shit to work so this should work for now lol
-      - echo kubernetes/deployment.yaml
       - kubectl apply -f kubernetes/deployment.yaml

@@ -5,6 +5,7 @@ COPY yarn.lock .
 COPY package.json .
 
 RUN yarn install --production --ignore-scripts --prefer-offline
+RUN yarn rebuild
 
 COPY dist/ ./dist
 
