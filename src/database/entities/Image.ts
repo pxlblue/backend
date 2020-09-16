@@ -54,6 +54,9 @@ export class Image extends BaseEntity {
   @Column()
   uploaderIp: string
 
+  @Column({ nullable: true })
+  deletionKey: string
+
   serialize() {
     return {
       id: this.id,
@@ -70,6 +73,7 @@ export class Image extends BaseEntity {
       deleted: this.deleted,
       deletionReason: this.deletionReason,
       uploaderIp: this.uploaderIp,
+      deletionKey: this.deletionKey,
     }
   }
 }

@@ -4,7 +4,7 @@ import multer from 'multer'
 import { User } from '../database/entities/User'
 import path from 'path'
 import { Image } from '../database/entities/Image'
-import { randomImageId } from '../util/RandomUtil'
+import { randomBytes, randomImageId } from '../util/RandomUtil'
 import crypto from 'crypto'
 import { bucket } from '../util/StorageUtil'
 const UploadRouter = express.Router()
@@ -43,11 +43,44 @@ async function uploadImage(
   image.contentType = file.mimetype
   image.originalName = file.originalname
   image.uploaderIp = ip
+  image.deletionKey = randomBytes(24)
   await image.save()
   await bucket.file(image.path).save(file.buffer)
 
   return image
 }
+
+UploadRouter.route('/extra').post(upload.single('file'), async (req, res) => {
+  let key = req.body.key
+  let user = await User.findOne({
+    where: {
+      uploadKey: key,
+    },
+  })
+  if (!user) {
+    return res.status(401).send({
+      success: false,
+      errors: ['Upload key is invalid'],
+    })
+  }
+  if (user.banned) {
+    return res.status(401).send({
+      success: false,
+      errors: [
+        'You are banned from pxl.blue\nCheck your email for more information',
+      ],
+    })
+  }
+  let host = req.body.host || 'i.pxl.blue'
+  let image = await uploadImage(host, user, req.file, false, req.realIp)
+  res.status(200).json({
+    success: true,
+    image,
+    url: (user.settings_discordLink ? '\u200b' : '') + image.url, // preferable to use this due to user settings affecting it
+    rawUrl: image.url,
+    deletionUrl: `${process.env.BASE_URL}/images/${image.path}?k=${image.deletionKey}`,
+  })
+})
 
 UploadRouter.route('/sharex').post(upload.single('file'), async (req, res) => {
   let key = req.body.key
