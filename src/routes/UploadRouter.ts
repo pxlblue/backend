@@ -28,7 +28,11 @@ async function uploadImage(
   ip: string
 ): Promise<Image> {
   user.imageCount = user.imageCount + 1
+  if (!user.usedIps.includes(ip)) {
+    user.usedIps = [...user.usedIps, ip]
+  }
   await user.save()
+
   let image = new Image()
   image.shortId = randomImageId()
   image.host = host
