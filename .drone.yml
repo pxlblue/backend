@@ -29,11 +29,12 @@ steps:
         from_secret: k8s_config_b64
       GCR_KEY:
         from_secret: gcr_key
-      GOOGLE_APPLICATION_CREDENTIALS: service-account.json
-      KUBECONFIG: kubeconfig.yaml
     commands:
       - echo $GCR_KEY > service-account.json
       - echo $K8S_CFGB64 | base64 -d > kubeconfig.yaml
+      - cat kubeconfig.yaml
+      - export GOOGLE_APPLICATION_CREDENTIALS=service-account.json
+      - export KUBECONFIG=kubeconfig.yaml
       - kubectl config set-context gke --cluster=gke_pxlblue_us-central1-c_pxl-blue --user=gke_pxlblue_us-central1-c_pxl-blue --namespace=production
       - kubectl config use-context gke
       - kubectl get pods
