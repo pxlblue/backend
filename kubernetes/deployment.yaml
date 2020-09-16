@@ -145,4 +145,14 @@ spec:
                 secretKeyRef:
                   name: backend-secret
                   key: sentry-dsn
+            - name: SYNAPSE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: synapse-url
+            - name: SYNAPSE_REGISTRATION_PSK
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: synapse-registration-psk
       terminationGracePeriodSeconds: 60
