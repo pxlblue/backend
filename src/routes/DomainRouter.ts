@@ -20,6 +20,9 @@ DomainRouter.route('/').get(async (req, res) => {
       public: true,
       disabled: false,
     },
+    order: {
+      id: 'ASC',
+    },
   })
   let count = await Domain.count({
     where: {
