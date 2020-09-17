@@ -27,6 +27,8 @@ const blacklisted_usernames = [
   'www',
   'uucp',
   'ftp',
+  'relative',
+  'r',
 ]
 const MailRouter = express.Router()
 
@@ -176,6 +178,12 @@ MailRouter.route('/alias/create').post(async (req, res) => {
     return res.status(400).json({
       success: false,
       errors: ['requested username is blacklisted'],
+    })
+  }
+  if (req.body.username.length <= 3) {
+    return res.status(400).json({
+      success: false,
+      errors: ['username is not 3 characters or more'],
     })
   }
   if (!req.body.username.match(valid_username_regex))
