@@ -83,13 +83,17 @@ UsersRouter.route('/:id')
       ;(req.user as any)[key] = req.body[key]
       keysModified.push(key)
     })
-    let validPassword = await argon2.verify(
-      req.user.password,
-      req.body.password,
-      {
-        type: argon2id,
-      }
-    )
+
+    let validPassword = false
+    if (!req.body.password) {
+      validPassword = await argon2.verify(
+        req.user.password,
+        req.body.password,
+        {
+          type: argon2id,
+        }
+      )
+    }
 
     if (req.body.email && typeof req.body.email === 'string') {
       if (!validPassword) {
