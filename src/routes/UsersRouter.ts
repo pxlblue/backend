@@ -4,6 +4,7 @@ import { authMiddleware, userIsAdmin } from '../util/Middleware'
 import { Invite } from '../database/entities/Invite'
 import { randomBytes } from '../util/RandomUtil'
 import { User } from '../database/entities/User'
+import argon2, { argon2id } from 'argon2'
 import bodyParser from 'body-parser'
 import { Image } from '../database/entities/Image'
 import { bucket } from '../util/StorageUtil'
@@ -82,6 +83,48 @@ UsersRouter.route('/:id')
       ;(req.user as any)[key] = req.body[key]
       keysModified.push(key)
     })
+    let validPassword = await argon2.verify(
+      req.user.password,
+      req.body.password,
+      {
+        type: argon2id,
+      }
+    )
+
+    if (req.body.email && typeof req.body.email === 'string') {
+      if (!validPassword) {
+        return res.status(401).json({
+          success: false,
+          errors: ['existing password is not correct'],
+        })
+      }
+      req.user.email = req.body.email
+      req.user.emailVerified = false
+      req.user.lowercaseEmail = req.user.email.toLowerCase()
+      req.user.emailVerificationToken = randomBytes()
+      await req.user.save()
+      return res.status(200).json({
+        success: true,
+        message: 'Please check your new email before logging in again.',
+      })
+    }
+
+    if (req.body.newPassword && typeof req.body.newPassword === 'string') {
+      if (!validPassword) {
+        return res.status(401).json({
+          success: false,
+          errors: ['existing password is not correct'],
+        })
+      }
+      let hash = await argon2.hash(req.body.newPassword, {
+        type: argon2id,
+      })
+      req.user.password = hash
+      await req.user.save()
+      return res
+        .status(200)
+        .json({ success: true, message: 'Updated your password' })
+    }
     await req.user.save()
     return res.status(200).json({ success: true, message: 'modified settings' })
   })
