@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm'
 import moment from 'moment'
+import { IImageMiddlewareSettings } from '../../images/util'
 @Entity()
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
@@ -140,6 +141,11 @@ export class User extends BaseEntity {
     default: false,
   })
   settings_imageMiddleware: boolean
+
+  @Column('json', {
+    default: { middleware: [] },
+  })
+  imageMiddleware: IImageMiddlewareSettings
 
   serialize() {
     return {

@@ -7,6 +7,7 @@ import { Image } from '../database/entities/Image'
 import { randomBytes, randomImageId } from '../util/RandomUtil'
 import crypto from 'crypto'
 import { bucket } from '../util/StorageUtil'
+import { processImage } from '../images'
 const UploadRouter = express.Router()
 
 UploadRouter.use(bodyParser.json())
@@ -33,6 +34,12 @@ async function uploadImage(
   }
   await user.save()
 
+  // process middleware
+  let img = file.buffer
+  if (user.settings_imageMiddleware) {
+    img = await processImage(img, user.imageMiddleware)
+  }
+
   let image = new Image()
   image.shortId = randomImageId()
   image.host = host
@@ -41,15 +48,18 @@ async function uploadImage(
   image.size = file.size
   image.uploadTime = new Date()
   image.url = `https://${host}/${image.path}`
+  if (host.startsWith('http://')) {
+    image.url = `${host}/${image.path}`
+  }
   const sha256 = crypto.createHash('sha256')
-  image.hash = sha256.update(file.buffer).digest('hex')
+  image.hash = sha256.update(img).digest('hex')
   image.uploader = user.id
   image.contentType = file.mimetype
   image.originalName = file.originalname
   image.uploaderIp = ip
   image.deletionKey = randomBytes(24)
   await image.save()
-  await bucket.file(image.path).save(file.buffer)
+  await bucket.file(image.path).save(img)
 
   return image
 }

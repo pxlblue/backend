@@ -4,6 +4,9 @@ import { createConnection } from 'typeorm'
 require('express-async-errors')
 config()
 import listen from './app'
+import { registerFonts } from './images'
+
+registerFonts()
 
 createConnection({
   type: 'postgres',

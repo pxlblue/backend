@@ -186,6 +186,48 @@ UsersRouter.route('/:id/invites')
     })
   })
 
+UsersRouter.route('/:id/middleware')
+  .get(async (req, res) => {
+    let user = req.user
+    if (req.params.id !== '@me' && req.user.admin) {
+      user = (await User.findOne({
+        where: {
+          id: req.params.id,
+        },
+      })) as User
+      if (!user)
+        return res
+          .status(400)
+          .json({ success: false, errors: ['that user does not exist'] })
+    }
+
+    return res
+      .status(200)
+      .json({ success: true, middleware: user.imageMiddleware })
+  })
+  .patch(async (req, res) => {
+    let user = req.user
+    if (req.params.id !== '@me' && req.user.admin) {
+      user = (await User.findOne({
+        where: {
+          id: req.params.id,
+        },
+      })) as User
+      if (!user)
+        return res
+          .status(400)
+          .json({ success: false, errors: ['that user does not exist'] })
+    }
+
+    // validate this against a schema at some point
+    user.imageMiddleware = req.body
+    await user.save()
+
+    return res
+      .status(200)
+      .json({ success: true, middleware: user.imageMiddleware })
+  })
+
 UsersRouter.route('/:id/images').get(async (req, res) => {
   let user = req.user
   if (req.params.id !== '@me' && req.user.admin) {
