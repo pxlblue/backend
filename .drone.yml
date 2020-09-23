@@ -11,7 +11,9 @@ steps:
     commands:
       - apk update
       - apk add --no-cache unzip
-      - sh src/images/fonts/unpack.sh
+      - pushd src/images/fonts
+      - unzip -P $PXL_FONTSPW fonts.zip
+      - popd
       - yarn install
       - yarn build
       - ls dist/images/fonts
