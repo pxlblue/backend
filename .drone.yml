@@ -9,7 +9,7 @@ steps:
       PXL_FONTSPW:
         from_secret: fontszip_pw
     commands:
-      - bash src/images/fonts/unpack.sh
+      - sh src/images/fonts/unpack.sh
       - yarn install
       - yarn build
       - ls dist/images/fonts
