@@ -9,6 +9,8 @@ steps:
       PXL_FONTSPW:
         from_secret: fontszip_pw
     commands:
+      - apk update
+      - apk add --no-cache unzip
       - sh src/images/fonts/unpack.sh
       - yarn install
       - yarn build
