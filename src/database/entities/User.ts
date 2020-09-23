@@ -124,6 +124,11 @@ export class User extends BaseEntity {
   @Column({
     default: false,
   })
+  betaTester: false
+
+  @Column({
+    default: false,
+  })
   settings_discordLink: boolean
 
   @Column({
@@ -162,6 +167,8 @@ export class User extends BaseEntity {
       discordId: this.discordId,
       discordTag: this.discordTag,
       matrixAccountCreated: this.matrixAccountCreated,
+
+      betaTester: this.betaTester,
 
       settings_discordLink: this.settings_discordLink,
       settings_apiIpSecurity: this.settings_apiIpSecurity,

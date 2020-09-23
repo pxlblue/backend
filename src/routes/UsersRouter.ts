@@ -46,11 +46,9 @@ UsersRouter.route('/').get(userIsAdmin(), async (req, res) => {
   })
 })
 
-let userWhitelist = [
-  'settings_discordLink',
-  'settings_apiIpSecurity',
-  'settings_imageMiddleware',
-] //TODO: look into just .startsWith('settings_') instead of a whitelist
+const userWhitelist = ['settings_discordLink', 'settings_apiIpSecurity'] //TODO: look into just .startsWith('settings_') instead of a whitelist
+
+const betaWhitelist = ['settings_imageMiddleware']
 
 UsersRouter.route('/:id')
   .get(async (req, res) => {
@@ -84,6 +82,7 @@ UsersRouter.route('/:id')
     let keysModified = []
     Object.keys(req.body).forEach((key) => {
       if (!userWhitelist.includes(key)) return
+      if (betaWhitelist.includes(key) && !req.user.betaTester) return
       ;(req.user as any)[key] = req.body[key]
       keysModified.push(key)
     })
