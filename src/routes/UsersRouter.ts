@@ -89,7 +89,7 @@ UsersRouter.route('/:id')
     })
 
     let validPassword = false
-    if (!req.body.password) {
+    if (req.body.password) {
       validPassword = await argon2.verify(
         req.user.password,
         req.body.password,
