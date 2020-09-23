@@ -81,7 +81,7 @@ UsersRouter.route('/:id')
       return res.status(400).json({ success: false, errors: ['no body'] })
     let keysModified = []
     Object.keys(req.body).forEach((key) => {
-      if (!userWhitelist.includes(key)) return
+      if (!userWhitelist.includes(key) && !betaWhitelist.includes(key)) return
       if (betaWhitelist.includes(key) && !req.user.betaTester) return
       ;(req.user as any)[key] = req.body[key]
       keysModified.push(key)
