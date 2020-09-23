@@ -131,6 +131,11 @@ export class User extends BaseEntity {
   })
   settings_apiIpSecurity: boolean
 
+  @Column({
+    default: false,
+  })
+  settings_imageMiddleware: boolean
+
   serialize() {
     return {
       id: this.id,
@@ -160,6 +165,7 @@ export class User extends BaseEntity {
 
       settings_discordLink: this.settings_discordLink,
       settings_apiIpSecurity: this.settings_apiIpSecurity,
+      settings_imageMiddleware: this.settings_imageMiddleware,
     }
   }
 }
