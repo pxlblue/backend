@@ -3,6 +3,8 @@ import TextMiddleware from './middleware/Text'
 import path from 'path'
 import { IImageMiddlewareSettings } from './util'
 import ImageMiddleware from './middleware/Middleware'
+import { IBorderMiddlewareOptions, ITextMiddlewareOptions } from './options'
+import BorderMiddleware from './middleware/Border'
 
 const fonts = [
   {
@@ -47,10 +49,17 @@ export async function processImage(
 
   for (let middlewareObj of middlewares.middleware) {
     let mw: ImageMiddleware
+    console.log(middlewareObj.type)
     switch (middlewareObj.type) {
       case 'text':
       default:
-        mw = new TextMiddleware(middlewareObj.options)
+        mw = new TextMiddleware(middlewareObj.options as ITextMiddlewareOptions)
+        break
+      case 'border':
+        mw = new BorderMiddleware(
+          middlewareObj.options as IBorderMiddlewareOptions
+        )
+        break
     }
     await mw.process(image, canvas, ctx)
   }

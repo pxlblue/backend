@@ -1,5 +1,5 @@
 import { CanvasGradient, CanvasRenderingContext2D } from 'canvas'
-import { ITextMiddlewareOptions } from './options'
+import { IBorderMiddlewareOptions, ITextMiddlewareOptions } from './options'
 
 interface IGradientStop {
   offset: number
@@ -19,8 +19,8 @@ export enum IAnchor {
 }
 
 export interface IImageMiddlewareSettingsMiddleware {
-  type: 'text'
-  options: ITextMiddlewareOptions
+  type: 'text' | 'border'
+  options: ITextMiddlewareOptions | IBorderMiddlewareOptions
 }
 
 export interface IImageMiddlewareSettings {

@@ -18,3 +18,10 @@ export interface ITextMiddlewareOptions {
 
   anchor: IAnchor
 }
+
+export interface IBorderMiddlewareOptions {
+  color: string | IGradient
+  width?: number
+
+  expand?: boolean
+}
