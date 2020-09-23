@@ -4,13 +4,12 @@ name: default
 
 steps:
   - name: build
-    image: node:14-alpine
+    image: node:14
     environment:
       PXL_FONTSPW:
         from_secret: fontszip_pw
     commands:
-      - apk update
-      - apk add --no-cache unzip
+      - apt-get install unzip
       - cd src/images/fonts
       - unzip -P $PXL_FONTSPW fonts.zip
       - cd ../../../
