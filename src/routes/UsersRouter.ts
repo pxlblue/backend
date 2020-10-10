@@ -300,7 +300,11 @@ UsersRouter.route('/:id/testimonial')
         .json({ success: false, errors: ['testimonial not created'] })
     return res
       .status(200)
-      .json({ success: true, testimonial: testimonial.serialize() })
+      .json({
+        success: true,
+        message: 'updated testimonial successfully',
+        testimonial: testimonial.serialize(),
+      })
   })
   .post(async (req, res) => {
     let user = await getUser(req)
@@ -310,15 +314,13 @@ UsersRouter.route('/:id/testimonial')
     })
 
     if (filter.isProfane(req.body.testimonial)) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          errors: [
-            'your testimonial contains a bad word',
-            `hint (cleaned version): ${filter.clean(req.body.testimonial)}`,
-          ],
-        })
+      return res.status(400).json({
+        success: false,
+        errors: [
+          'your testimonial contains a bad word',
+          `hint (cleaned version): ${filter.clean(req.body.testimonial)}`,
+        ],
+      })
     }
     if (!testimonial) {
       testimonial = new Testimonial()
