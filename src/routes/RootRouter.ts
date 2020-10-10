@@ -1,4 +1,5 @@
 import express from 'express'
+import { User } from '../database/entities/User'
 import { Testimonial } from '../database/entities/Testimonial'
 
 const RootRouter = express.Router()
@@ -13,15 +14,20 @@ RootRouter.route('/').all((req, res) => {
 RootRouter.route('/testimonial').get(async (req, res) => {
   let testimonial = await Testimonial.getRepository()
     .createQueryBuilder()
-    .select('testimonials.testimonial')
+    .select(['testimonials.testimonial', 'testimonials.author'])
     .from(Testimonial, 'testimonials')
     .orderBy('RANDOM()')
     .limit(1)
     .getOne()
-
-  return res
-    .status(200)
-    .json({ success: true, testimonial: testimonial?.serialize() })
+  console.log(testimonial)
+  let author = await User.findOne({ where: { id: testimonial?.author } })
+  return res.status(200).json({
+    success: true,
+    testimonial: {
+      testimonial: testimonial?.testimonial,
+      author: author?.username,
+    },
+  })
 })
 
 export default RootRouter
