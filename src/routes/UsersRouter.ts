@@ -8,6 +8,7 @@ import argon2, { argon2id } from 'argon2'
 import bodyParser from 'body-parser'
 import { Image } from '../database/entities/Image'
 import { bucket } from '../util/StorageUtil'
+import { Testimonial } from '../database/entities/Testimonial'
 
 const valid_username_regex = /^[a-z0-9]+$/i
 const email_regex = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/
@@ -50,6 +51,19 @@ const userWhitelist = ['settings_discordLink', 'settings_apiIpSecurity'] //TODO:
 
 const betaWhitelist = ['settings_imageMiddleware']
 
+async function getUser(req: express.Request): Promise<User> {
+  let user = req.user
+  if (req.params.id !== '@me' && req.user.admin) {
+    user = (await User.findOne({
+      where: {
+        id: req.params.id,
+      },
+    })) as User
+    if (!user) throw new Error('User does not exist')
+  }
+  return user
+}
+
 UsersRouter.route('/:id')
   .get(async (req, res) => {
     if (req.user.banned) {
@@ -58,18 +72,7 @@ UsersRouter.route('/:id')
         errors: [`your account is banned:\n${req.user.banReason}`],
       })
     }
-    let user = req.user
-    if (req.params.id !== '@me' && req.user.admin) {
-      user = (await User.findOne({
-        where: {
-          id: req.params.id,
-        },
-      })) as User
-      if (!user)
-        return res
-          .status(400)
-          .json({ success: false, errors: ['that user does not exist'] })
-    }
+    let user = await getUser(req)
     res.status(200).json({
       success: true,
       message: 'ok',
@@ -137,18 +140,7 @@ UsersRouter.route('/:id')
   })
 UsersRouter.route('/:id/invites')
   .get(async (req, res) => {
-    let user = req.user
-    if (req.params.id !== '@me' && req.user.admin) {
-      user = (await User.findOne({
-        where: {
-          id: req.params.id,
-        },
-      })) as User
-      if (!user)
-        return res
-          .status(400)
-          .json({ success: false, errors: ['that user does not exist'] })
-    }
+    let user = await getUser(req)
     let invites = await Invite.find({
       where: {
         creator: user.id,
@@ -188,36 +180,14 @@ UsersRouter.route('/:id/invites')
 
 UsersRouter.route('/:id/middleware')
   .get(async (req, res) => {
-    let user = req.user
-    if (req.params.id !== '@me' && req.user.admin) {
-      user = (await User.findOne({
-        where: {
-          id: req.params.id,
-        },
-      })) as User
-      if (!user)
-        return res
-          .status(400)
-          .json({ success: false, errors: ['that user does not exist'] })
-    }
+    let user = await getUser(req)
 
     return res
       .status(200)
       .json({ success: true, middleware: user.imageMiddleware })
   })
   .patch(async (req, res) => {
-    let user = req.user
-    if (req.params.id !== '@me' && req.user.admin) {
-      user = (await User.findOne({
-        where: {
-          id: req.params.id,
-        },
-      })) as User
-      if (!user)
-        return res
-          .status(400)
-          .json({ success: false, errors: ['that user does not exist'] })
-    }
+    let user = await getUser(req)
 
     // validate this against a schema at some point
     user.imageMiddleware = req.body
@@ -229,18 +199,7 @@ UsersRouter.route('/:id/middleware')
   })
 
 UsersRouter.route('/:id/images').get(async (req, res) => {
-  let user = req.user
-  if (req.params.id !== '@me' && req.user.admin) {
-    user = (await User.findOne({
-      where: {
-        id: req.params.id,
-      },
-    })) as User
-    if (!user)
-      return res
-        .status(400)
-        .json({ success: false, errors: ['that user does not exist'] })
-  }
+  let user = await getUser(req)
   let limit = 50
   let page = 0
   let order: 'ASC' | 'DESC' = 'ASC'
@@ -280,18 +239,7 @@ UsersRouter.route('/:id/images').get(async (req, res) => {
 })
 
 UsersRouter.route('/:id/images/nuke').post(async (req, res) => {
-  let user = req.user
-  if (req.params.id !== '@me' && req.user.admin) {
-    user = (await User.findOne({
-      where: {
-        id: req.params.id,
-      },
-    })) as User
-    if (!user)
-      return res
-        .status(400)
-        .json({ success: false, errors: ['that user does not exist'] })
-  }
+  let user = await getUser(req)
   let images = await Image.find({
     where: {
       uploader: user.id,
@@ -321,18 +269,7 @@ UsersRouter.route('/:id/images/nuke').post(async (req, res) => {
 })
 
 UsersRouter.route('/:id/keys/:key/regenerate').post(async (req, res) => {
-  let user = req.user
-  if (req.params.id !== '@me' && req.user.admin) {
-    user = (await User.findOne({
-      where: {
-        id: req.params.id,
-      },
-    })) as User
-    if (!user)
-      return res
-        .status(400)
-        .json({ success: false, errors: ['that user does not exist'] })
-  }
+  let user = await getUser(req)
 
   if (!['uploadKey', 'apiKey'].includes(req.params.key))
     return res.status(400).json({
@@ -348,6 +285,40 @@ UsersRouter.route('/:id/keys/:key/regenerate').post(async (req, res) => {
     newValue: key,
   })
 })
+
+UsersRouter.route('/:id/testimonial')
+  .get(async (req, res) => {
+    let user = await getUser(req)
+
+    let testimonial = await Testimonial.findOne({
+      where: { author: user.id },
+    })
+    if (!testimonial)
+      return res
+        .status(400)
+        .json({ success: false, errors: ['testimonial not created'] })
+    return res
+      .status(200)
+      .json({ success: true, testimonial: testimonial.serialize() })
+  })
+  .post(async (req, res) => {
+    let user = await getUser(req)
+
+    let testimonial = await Testimonial.findOne({
+      where: { author: user.id },
+    })
+    if (!testimonial) {
+      testimonial = new Testimonial()
+      testimonial.author = user.id
+      testimonial.testimonial = req.body.testimonial.substr(0, 100)
+      testimonial.createdAt = new Date()
+      await testimonial.save()
+      return res.json({ success: true, testimonial: testimonial.serialize() })
+    }
+    testimonial.testimonial = req.body.testimonial.substr(0, 100)
+    await testimonial.save()
+    return res.json({ success: true, testimonial: testimonial.serialize() })
+  })
 
 const BASE_UPLOADER_CONFIG = {
   Version: '13.1.0',
