@@ -298,13 +298,10 @@ UsersRouter.route('/:id/testimonial')
       return res
         .status(400)
         .json({ success: false, errors: ['testimonial not created'] })
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: 'updated testimonial successfully',
-        testimonial: testimonial.serialize(),
-      })
+    return res.status(200).json({
+      success: true,
+      testimonial: testimonial.serialize(),
+    })
   })
   .post(async (req, res) => {
     let user = await getUser(req)
@@ -328,11 +325,19 @@ UsersRouter.route('/:id/testimonial')
       testimonial.testimonial = req.body.testimonial.substr(0, 100)
       testimonial.createdAt = new Date()
       await testimonial.save()
-      return res.json({ success: true, testimonial: testimonial.serialize() })
+      return res.json({
+        success: true,
+        message: 'updated testimonial successfully',
+        testimonial: testimonial.serialize(),
+      })
     }
     testimonial.testimonial = req.body.testimonial.substr(0, 100)
     await testimonial.save()
-    return res.json({ success: true, testimonial: testimonial.serialize() })
+    return res.json({
+      success: true,
+      message: 'updated testimonial successfully',
+      testimonial: testimonial.serialize(),
+    })
   })
 
 const BASE_UPLOADER_CONFIG = {
