@@ -12,6 +12,7 @@
     "dev": "ts-node-dev src/index.ts"
   },
   "devDependencies": {
+    "@types/bad-words": "^3.0.0",
     "@types/body-parser": "^1.19.0",
     "@types/cors": "^2.8.6",
     "@types/dotenv": "^8.2.0",
@@ -33,6 +34,7 @@
     "@logdna/logger": "^1.2.0",
     "@sendgrid/mail": "^7.1.1",
     "argon2": "^0.26.2",
+    "bad-words": "^3.0.3",
     "body-parser": "^1.19.0",
     "canvas": "^2.6.1",
     "cors": "^2.8.5",
