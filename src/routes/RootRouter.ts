@@ -15,6 +15,7 @@ RootRouter.route('/testimonial').get(async (req, res) => {
   let testimonial = await Testimonial.getRepository()
     .createQueryBuilder()
     .select(['testimonials.testimonial', 'testimonials.author'])
+    .where('testimonials.approved = true')
     .from(Testimonial, 'testimonials')
     .orderBy('RANDOM()')
     .limit(1)
