@@ -26,11 +26,6 @@ steps:
       tags: ["${DRONE_COMMIT}", "latest"]
   - name: deploy
     image: sinlead/drone-kubectl
-    settings:
-      kubernetes_server:
-        from_secret: k8s_server
-      kubernetes_cert:
-        from_secret: k8s_cert
     environment:
       K8S_CFGB64:
         from_secret: k8s_config_b64
