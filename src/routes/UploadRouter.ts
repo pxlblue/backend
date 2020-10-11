@@ -8,6 +8,8 @@ import { randomBytes, randomImageId } from '../util/RandomUtil'
 import crypto from 'crypto'
 import { bucket } from '../util/StorageUtil'
 import { processImage } from '../images'
+import _ from 'lodash'
+
 const UploadRouter = express.Router()
 
 UploadRouter.use(bodyParser.json())
@@ -33,6 +35,10 @@ async function uploadImage(
     user.usedIps = [...user.usedIps, ip]
   }
   await user.save()
+
+  if (host === 'pxl_rand') {
+    host = _.sample(user.settings_randomDomains) || 'i.pxl.blue'
+  }
 
   // process middleware
   let img = file.buffer

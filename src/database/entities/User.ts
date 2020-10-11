@@ -142,6 +142,12 @@ export class User extends BaseEntity {
   })
   settings_imageMiddleware: boolean
 
+  @Column('text', {
+    array: true,
+    default: '{}',
+  })
+  settings_randomDomains: string[]
+
   @Column('json', {
     default: { middleware: [] },
   })
@@ -179,6 +185,7 @@ export class User extends BaseEntity {
       settings_discordLink: this.settings_discordLink,
       settings_apiIpSecurity: this.settings_apiIpSecurity,
       settings_imageMiddleware: this.settings_imageMiddleware,
+      settings_randomDomains: this.settings_randomDomains,
     }
   }
 }

@@ -48,7 +48,11 @@ UsersRouter.route('/').get(userIsAdmin(), async (req, res) => {
   })
 })
 
-const userWhitelist = ['settings_discordLink', 'settings_apiIpSecurity'] //TODO: look into just .startsWith('settings_') instead of a whitelist
+const userWhitelist = [
+  'settings_discordLink',
+  'settings_apiIpSecurity',
+  'settings_randomDomains',
+] //TODO: look into just .startsWith('settings_') instead of a whitelist
 
 const betaWhitelist = ['settings_imageMiddleware']
 
