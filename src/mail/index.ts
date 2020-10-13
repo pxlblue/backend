@@ -1,9 +1,4 @@
-import mysql, {
-  Pool,
-  PoolConnection,
-  RowDataPacket,
-} from 'mysql2/promise'
-
+import mysql, { Pool, PoolConnection, RowDataPacket } from 'mysql2/promise'
 
 class MailDb {
   pool: Pool
@@ -66,7 +61,7 @@ class MailDb {
   async getDomains() {
     const connection = await this.connection()
     const [results] = await connection.execute(
-      'SELECT * FROM `virtual_domains` WHERE `name` != "pxl.so" AND `name` != "whistler.blizzard.to" AND `name` != "whistler";'
+      'SELECT * FROM `virtual_domains` WHERE `name` != "pxl.so" AND `name` != "mail.pxl.so" AND `name` != "mail";'
     )
     connection.release()
     let r = results as RowDataPacket[]
@@ -121,7 +116,7 @@ class MailDb {
   async createDomain(domain: string) {
     if (await this.domainExists(domain))
       throw new Error('domain already exists in database')
-      const connection = await this.connection()  
+    const connection = await this.connection()
     const [
       results,
     ] = await connection.execute(
