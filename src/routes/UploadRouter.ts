@@ -178,14 +178,23 @@ UploadRouter.route('/shorten').post(async (req, res) => {
 
   shortUrl.url = `https://${shortUrl.host}/${shortUrl.shortId}`
   shortUrl.destination = req.body.destination
+  if (!shortUrl.destination.startsWith('http')) {
+    // Needed for discordLink support sharex URL => shortener workflow
+    let idx = shortUrl.destination.indexOf('http')
+    if (idx === -1)
+      return res
+        .status(200)
+        .send(
+          'Destination URL is invalid.\nPlease check your request and try again.'
+        )
+    shortUrl.destination = shortUrl.destination.substr(idx)
+  }
   await shortUrl.save()
-  return res
-    .status(200)
-    .json({
-      success: true,
-      shortened: shortUrl.serialize(),
-      url: (user.settings_discordLink ? '\u200b' : '') + shortUrl.url,
-    })
+  return res.status(200).json({
+    success: true,
+    shortened: shortUrl.serialize(),
+    url: (user.settings_discordLink ? '\u200b' : '') + shortUrl.url,
+  })
 })
 
 export default UploadRouter
