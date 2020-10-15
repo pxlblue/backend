@@ -15,3 +15,13 @@ export function randomImageId(secure: boolean = false) {
     charset: 'AaBbCcDdEeFf1234567890',
   })
 }
+
+const invisibleCharset = ['\u200B', '\u2060', '\u180E', '\u200D', '\u200C']
+export function randomInvisibleId(secure: boolean = false) {
+  return (
+    randomstring.generate({
+      length: secure ? 24 : 18,
+      charset: invisibleCharset.join(''),
+    }) + '\u200B'
+  )
+}
