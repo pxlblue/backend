@@ -181,7 +181,11 @@ UploadRouter.route('/shorten').post(async (req, res) => {
   await shortUrl.save()
   return res
     .status(200)
-    .json({ success: true, shortened: shortUrl.serialize(), url: shortUrl.url })
+    .json({
+      success: true,
+      shortened: shortUrl.serialize(),
+      url: (user.settings_discordLink ? '\u200b' : '') + shortUrl.url,
+    })
 })
 
 export default UploadRouter
