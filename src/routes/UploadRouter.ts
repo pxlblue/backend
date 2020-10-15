@@ -9,6 +9,7 @@ import crypto from 'crypto'
 import { bucket } from '../util/StorageUtil'
 import { processImage } from '../images'
 import _ from 'lodash'
+import { ShortURL } from 'src/database/entities/ShortURL'
 
 const UploadRouter = express.Router()
 
@@ -22,6 +23,10 @@ UploadRouter.use(
 const upload = multer({
   storage: multer.memoryStorage(),
 })
+
+async function getRandomHost(user: User): Promise<string> {
+  return _.sample(user.settings_randomDomains) || 'i.pxl.blue'
+}
 
 async function uploadImage(
   host: string,
@@ -37,7 +42,7 @@ async function uploadImage(
   await user.save()
 
   if (host === 'pxl_rand') {
-    host = _.sample(user.settings_randomDomains) || 'i.pxl.blue'
+    host = await getRandomHost(user)
   }
 
   // process middleware
@@ -124,6 +129,53 @@ UploadRouter.route('/sharex').post(upload.single('file'), async (req, res) => {
   let host = req.body.host || 'i.pxl.blue'
   let image = await uploadImage(host, user, req.file, false, req.realIp)
   res.status(200).send((user.settings_discordLink ? '\u200b' : '') + image.url)
+})
+
+UploadRouter.route('/shorten').post(async (req, res) => {
+  let key = req.body.key
+  let user = await User.findOne({
+    where: {
+      uploadKey: key,
+    },
+  })
+  if (!user) {
+    return res
+      .status(200)
+      .send('Upload key is invalid\nPlease regenerate your config at pxl.blue')
+  }
+  if (user.banned) {
+    return res
+      .status(200)
+      .send(
+        'You are banned from pxl.blue\nCheck your email for more information'
+      )
+  }
+
+  if (!req.body.destination) {
+    return res
+      .status(200)
+      .send(
+        'No destination URL was sent in your request\nPlease check your request and try again.'
+      )
+  }
+
+  let shortUrl = new ShortURL()
+  shortUrl.creator = user.id
+  shortUrl.host = req.body.host || 'i.pxl.blue'
+  if (shortUrl.host === 'pxl_rand') {
+    shortUrl.host = await getRandomHost(user)
+  }
+  shortUrl.creationTime = new Date()
+  shortUrl.creatorIp = req.ip
+
+  shortUrl.shortId = randomImageId()
+
+  shortUrl.url = `${shortUrl.host}/${shortUrl.shortId}`
+  shortUrl.destination = req.body.destination
+  await shortUrl.save()
+  return res
+    .status(200)
+    .json({ success: true, shortened: shortUrl.serialize(), url: shortUrl.url })
 })
 
 export default UploadRouter
