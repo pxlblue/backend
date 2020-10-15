@@ -176,7 +176,7 @@ UploadRouter.route('/shorten').post(async (req, res) => {
     ? randomInvisibleId(user.settings_secureURLs)
     : randomImageId(user.settings_secureURLs)
 
-  shortUrl.url = `${shortUrl.host}/${shortUrl.shortId}`
+  shortUrl.url = `https://${shortUrl.host}/${shortUrl.shortId}`
   shortUrl.destination = req.body.destination
   await shortUrl.save()
   return res
