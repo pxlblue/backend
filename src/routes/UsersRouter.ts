@@ -52,6 +52,8 @@ const userWhitelist = [
   'settings_discordLink',
   'settings_apiIpSecurity',
   'settings_randomDomains',
+  'settings_secureURLs',
+  'settings_invisibleShortURLs',
 ] //TODO: look into just .startsWith('settings_') instead of a whitelist
 
 const betaWhitelist = ['settings_imageMiddleware']
