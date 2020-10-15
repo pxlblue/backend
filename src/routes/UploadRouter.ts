@@ -52,7 +52,7 @@ async function uploadImage(
   }
 
   let image = new Image()
-  image.shortId = randomImageId()
+  image.shortId = randomImageId(user.settings_secureURLs)
   image.host = host
   let ext = path.extname(file.originalname)
   image.path = `${image.shortId}${ext}`
@@ -168,7 +168,7 @@ UploadRouter.route('/shorten').post(async (req, res) => {
   shortUrl.creationTime = new Date()
   shortUrl.creatorIp = req.ip
 
-  shortUrl.shortId = randomImageId()
+  shortUrl.shortId = randomImageId(user.settings_secureURLs)
 
   shortUrl.url = `${shortUrl.host}/${shortUrl.shortId}`
   shortUrl.destination = req.body.destination
