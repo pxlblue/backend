@@ -417,6 +417,21 @@ const BASE_UPLOADER_CONFIG = {
   DeletionURL: '$json:deletionUrl$',
 }
 
+const BASE_SHORTENER_CONFIG = {
+  Version: '13.1.0',
+  Name: 'pxl.blue URL shortener (%username%)',
+  DestinationType: 'URLShortener',
+  RequestMethod: 'POST',
+  RequestURL: 'https://api.pxl.blue/upload/shorten',
+  Body: 'FormURLEncoded',
+  Arguments: {
+    key: '%key%',
+    host: 'i.pxl.blue',
+    destination: '$input$',
+  },
+  URL: '$json:url$',
+}
+
 UsersRouter.route('/@me/generate_sharex_config').get(async (req, res) => {
   let cfg = {
     ...BASE_UPLOADER_CONFIG,
@@ -431,6 +446,27 @@ UsersRouter.route('/@me/generate_sharex_config').get(async (req, res) => {
   res.setHeader(
     'Content-Disposition',
     `attachment; filename=pxl.blue_${req.user.username}_on_${cfg.Arguments.host}.sxcu`
+  )
+  res.setHeader('Content-Transfer-Encoding', 'binary')
+  res.setHeader('Content-Type', 'application/octet-stream')
+  return res.send(JSON.stringify(cfg))
+})
+
+UsersRouter.route('/@me/generate_shortener_config').get(async (req, res) => {
+  let cfg = {
+    ...BASE_SHORTENER_CONFIG,
+    Name: `pxl.blue URL shortener (${req.user.username} on ${
+      req.query.domain || 'i.pxl.blue'
+    })`,
+    Arguments: {
+      key: req.user.uploadKey,
+      host: req.query.domain || 'i.pxl.blue',
+      destination: '$input$',
+    },
+  }
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename=pxl.blue_urlshortener_${req.user.username}_on_${cfg.Arguments.host}.sxcu`
   )
   res.setHeader('Content-Transfer-Encoding', 'binary')
   res.setHeader('Content-Type', 'application/octet-stream')
