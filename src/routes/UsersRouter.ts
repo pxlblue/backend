@@ -10,6 +10,7 @@ import { Image } from '../database/entities/Image'
 import { bucket } from '../util/StorageUtil'
 import { Testimonial } from '../database/entities/Testimonial'
 import filter from '../util/FilterUtil'
+import { ShortURL } from '../database/entities/ShortURL'
 
 const valid_username_regex = /^[a-z0-9]+$/i
 const email_regex = /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/
@@ -272,6 +273,60 @@ UsersRouter.route('/:id/images/nuke').post(async (req, res) => {
   return res.status(200).json({
     success: true,
     message: 'your images have been queued for deletion',
+  })
+})
+
+UsersRouter.route('/:id/shorturls').get(async (req, res) => {
+  let user = await getUser(req)
+  let limit = 50
+  let page = 0
+  let order: 'ASC' | 'DESC' = 'ASC'
+  if (req.query && req.query.limit) {
+    limit = parseInt(req.query.limit as string)
+  }
+  if (req.query && req.query.page) {
+    page = parseInt(req.query.page as string)
+  }
+  if (req.query && req.query.order === 'DESC') order = 'DESC'
+  page = page * limit
+  let urls = await ShortURL.find({
+    order: {
+      id: order,
+    },
+    where: {
+      creator: user.id,
+    },
+    take: limit,
+    skip: page,
+  })
+  let count = await ShortURL.count({
+    where: {
+      creator: user.id,
+    },
+  })
+  return res.status(200).json({
+    success: true,
+    message: 'urls',
+    urls: urls.map((url) => url.serialize()),
+    total: count,
+    page: page,
+    pages: Math.ceil(count / limit) - 1,
+  })
+})
+
+UsersRouter.route('/:id/shorturls/nuke').post(async (req, res) => {
+  let user = await getUser(req)
+
+  await ShortURL.getRepository()
+    .createQueryBuilder()
+    .delete()
+    .from(ShortURL)
+    .where('creator = :id', { id: user.id })
+    .execute()
+
+  return res.status(200).json({
+    success: true,
+    message: 'your shorturls have been deleted',
   })
 })
 
