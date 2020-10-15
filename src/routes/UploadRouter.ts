@@ -13,7 +13,7 @@ import crypto from 'crypto'
 import { bucket } from '../util/StorageUtil'
 import { processImage } from '../images'
 import _ from 'lodash'
-import { ShortURL } from 'src/database/entities/ShortURL'
+import { ShortURL } from '../database/entities/ShortURL'
 
 const UploadRouter = express.Router()
 
