@@ -4,7 +4,11 @@ import multer from 'multer'
 import { User } from '../database/entities/User'
 import path from 'path'
 import { Image } from '../database/entities/Image'
-import { randomBytes, randomImageId } from '../util/RandomUtil'
+import {
+  randomBytes,
+  randomImageId,
+  randomInvisibleId,
+} from '../util/RandomUtil'
 import crypto from 'crypto'
 import { bucket } from '../util/StorageUtil'
 import { processImage } from '../images'
@@ -168,7 +172,9 @@ UploadRouter.route('/shorten').post(async (req, res) => {
   shortUrl.creationTime = new Date()
   shortUrl.creatorIp = req.ip
 
-  shortUrl.shortId = randomImageId(user.settings_secureURLs)
+  shortUrl.shortId = user.settings_invisibleShortURLs
+    ? randomInvisibleId(user.settings_secureURLs)
+    : randomImageId(user.settings_secureURLs)
 
   shortUrl.url = `${shortUrl.host}/${shortUrl.shortId}`
   shortUrl.destination = req.body.destination
