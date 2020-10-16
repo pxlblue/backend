@@ -1,4 +1,12 @@
 import { Entity, Column, BaseEntity, PrimaryGeneratedColumn } from 'typeorm'
+
+export enum InviteType {
+  DEFAULT,
+  BAN,
+  REDIRECT,
+  LIMITED,
+}
+
 @Entity()
 export class Invite extends BaseEntity {
   @PrimaryGeneratedColumn()
@@ -33,6 +41,11 @@ export class Invite extends BaseEntity {
   })
   redeemedByUsername: string
 
+  @Column({
+    default: InviteType.DEFAULT,
+  })
+  type: InviteType
+
   serialize() {
     return {
       id: this.id,
@@ -43,6 +56,7 @@ export class Invite extends BaseEntity {
       redeemedAt: this.redeemedAt,
       redeemedBy: this.redeemedBy,
       redeemedByUsername: this.redeemedByUsername,
+      type: this.type,
     }
   }
 }
