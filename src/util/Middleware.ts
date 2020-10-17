@@ -153,6 +153,26 @@ export function authMiddleware(whitelist?: (string | RegExp)[]) {
   }
 }
 
+export function userIsModerator() {
+  return function middleware(req: Request, res: Response, next: NextFunction) {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'auth required',
+        errors: ['authorization not provided'],
+      })
+    }
+    if (!req.user.moderator && !req.user.admin) {
+      return res.status(401).json({
+        success: false,
+        message: 'auth required',
+        errors: ['this request requires moderator'],
+      })
+    }
+    return next()
+  }
+}
+
 export function userIsAdmin() {
   return function middleware(req: Request, res: Response, next: NextFunction) {
     if (!req.user) {
