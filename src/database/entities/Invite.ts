@@ -46,6 +46,9 @@ export class Invite extends BaseEntity {
   })
   type: InviteType
 
+  @Column({ nullable: true })
+  params: string
+
   serialize() {
     return {
       id: this.id,
@@ -57,6 +60,7 @@ export class Invite extends BaseEntity {
       redeemedBy: this.redeemedBy,
       redeemedByUsername: this.redeemedByUsername,
       type: this.type,
+      params: this.params,
     }
   }
 }
