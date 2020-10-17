@@ -75,6 +75,7 @@ InvitesRouter.route('/create').post(userIsModerator(), async (req, res) => {
   if (invite.type > 3)
     // Max = 3
     invite.type = 0
+  invite.params = req.body.params
   await invite.save()
 
   return res.status(200).json({ success: true, invite: invite.serialize() })
