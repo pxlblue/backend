@@ -1,6 +1,10 @@
 import express from 'express'
 
-import { authMiddleware, userIsAdmin } from '../util/Middleware'
+import {
+  authMiddleware,
+  userIsAdmin,
+  userIsModerator,
+} from '../util/Middleware'
 import { Invite } from '../database/entities/Invite'
 import bodyParser from 'body-parser'
 import { User } from '../database/entities/User'
@@ -60,6 +64,20 @@ InvitesRouter.route('/wave').post(userIsAdmin(), async (req, res) => {
     success: true,
     message: `started invite wave for uid < ${maxUid}`,
   })
+})
+
+InvitesRouter.route('/create').post(userIsModerator(), async (req, res) => {
+  let invite = new Invite()
+  invite.invite = randomBytes(20)
+  invite.createdAt = new Date()
+  invite.creator = req.user.id
+  invite.type = req.body.type
+  if (invite.type > 3)
+    // Max = 3
+    invite.type = 0
+  await invite.save()
+
+  return res.status(200).json({ success: true, invite: invite.serialize() })
 })
 
 export default InvitesRouter
