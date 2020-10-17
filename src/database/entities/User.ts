@@ -159,6 +159,15 @@ export class User extends BaseEntity {
   })
   imageMiddleware: IImageMiddlewareSettings
 
+  @Column({ default: false })
+  limited: boolean
+
+  @Column({ nullable: true })
+  limitedId: string
+
+  @Column({ default: false })
+  deactivated: boolean
+
   serialize() {
     return {
       id: this.id,
@@ -187,6 +196,10 @@ export class User extends BaseEntity {
       matrixAccountCreated: this.matrixAccountCreated,
 
       betaTester: this.betaTester,
+
+      limited: this.limited,
+      limitedId: this.limitedId,
+      deactivated: this.deactivated,
 
       settings_discordLink: this.settings_discordLink,
       settings_apiIpSecurity: this.settings_apiIpSecurity,
