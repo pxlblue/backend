@@ -288,7 +288,9 @@ AuthRouter.route('/login').post(async (req, res) => {
   session.userId = user.id
   session.ip = req.realIp
   session.rememberMe = false
-  session.expiresAt = now.add(8, 'hours').toDate()
+  session.expiresAt = now
+    .add(8, req.body.rememberMe ? 'days' : 'hours')
+    .toDate()
   await session.save()
 
   return res.status(200).json({
