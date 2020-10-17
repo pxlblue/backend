@@ -480,4 +480,21 @@ UsersRouter.route('/@me/generate_shortener_config').get(async (req, res) => {
   return res.send(JSON.stringify(cfg))
 })
 
+// admin routes
+UsersRouter.route('/:id/suspend').post(userIsAdmin(), async (req, res) => {
+  let user = await getUser(req)
+  user.banned = true
+  user.banReason = req.body.reason
+  await user.save()
+
+  return res.status(200).json({ success: true, user: user.serialize() })
+})
+UsersRouter.route('/:id/unsuspend').post(userIsAdmin(), async (req, res) => {
+  let user = await getUser(req)
+  user.banned = false
+  await user.save()
+
+  return res.status(200).json({ success: true, user: user.serialize() })
+})
+
 export default UsersRouter
