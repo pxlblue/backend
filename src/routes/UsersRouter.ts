@@ -55,6 +55,7 @@ const userWhitelist = [
   'settings_randomDomains',
   'settings_secureURLs',
   'settings_invisibleShortURLs',
+  'settings_ipSecurity',
 ] //TODO: look into just .startsWith('settings_') instead of a whitelist
 
 const betaWhitelist = ['settings_imageMiddleware']
