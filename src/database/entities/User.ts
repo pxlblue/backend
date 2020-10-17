@@ -154,7 +154,7 @@ export class User extends BaseEntity {
   @Column({ default: false })
   settings_invisibleShortURLs: boolean
 
-  @Column({ default: false })
+  @Column({ default: true })
   settings_ipSecurity: boolean
 
   @Column('json', {
