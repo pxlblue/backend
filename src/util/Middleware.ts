@@ -62,8 +62,13 @@ export function authMiddleware(whitelist?: (string | RegExp)[]) {
           errors: ['session not found'],
         })
       }
-
-      if (session.ip !== req.realIp) {
+      let user = await User.findOne({
+        where: {
+          id: session.userId,
+        },
+        select: ['settings_ipSecurity'],
+      })
+      if (user?.settings_ipSecurity && session.ip !== req.realIp) {
         await session.remove()
         return res.status(401).json({
           success: false,
@@ -87,7 +92,7 @@ export function authMiddleware(whitelist?: (string | RegExp)[]) {
       }
 
       // all valid!
-      let user = await User.findOne({
+      user = await User.findOne({
         where: {
           id: session.userId,
         },
