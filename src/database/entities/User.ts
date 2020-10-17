@@ -154,6 +154,9 @@ export class User extends BaseEntity {
   @Column({ default: false })
   settings_invisibleShortURLs: boolean
 
+  @Column({ default: false })
+  settings_ipSecurity: boolean
+
   @Column('json', {
     default: { middleware: [] },
   })
@@ -207,6 +210,7 @@ export class User extends BaseEntity {
       settings_randomDomains: this.settings_randomDomains,
       settings_secureURLs: this.settings_secureURLs,
       settings_invisibleShortURLs: this.settings_invisibleShortURLs,
+      settings_ipSecurity: this.settings_ipSecurity,
     }
   }
 }
