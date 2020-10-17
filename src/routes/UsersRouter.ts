@@ -79,6 +79,11 @@ async function getUser(
   return user
 }
 
+UsersRouter.route('/find').get(userIsAdmin(), async (req, res) => {
+  let user = await User.findOne({ where: req.body })
+  return res.status(200).json({ success: true, user })
+})
+
 UsersRouter.route('/:id')
   .get(async (req, res) => {
     if (req.user.banned) {
