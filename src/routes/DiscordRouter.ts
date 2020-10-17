@@ -68,6 +68,12 @@ DiscordRouter.route('/redirect').get(async (req, res) => {
   const userJson = await userRes.json()
   const roles = [process.env.DISCORD_ROLE_MEMBER]
 
+  if (user.limited && userJson.id !== user.limitedId) {
+    return res.send(
+      `<meta http-equiv="refresh" content="5;URL='https://pxl.blue/account/discord/'"/><h1>Your Discord link failed</h1><p>${userJson.username}#${userJson.discriminator} (<code>${userJson.id}</code>) is not the account you boosted the server with. Please link the account you boosted the server with.<p>Redirecting to pxl.blue in 5 seconds</p>`
+    )
+  }
+
   await fetch(
     `https://discord.com/api/guilds/${process.env.DISCORD_GUILD!}/members/${
       userJson.id
