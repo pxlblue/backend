@@ -59,9 +59,15 @@ const userWhitelist = [
 
 const betaWhitelist = ['settings_imageMiddleware']
 
-async function getUser(req: express.Request): Promise<User> {
+async function getUser(
+  req: express.Request,
+  moderator: boolean = false
+): Promise<User> {
   let user = req.user
-  if (req.params.id !== '@me' && req.user.admin) {
+  if (
+    req.params.id !== '@me' &&
+    (req.user.admin || (moderator && req.user.moderator))
+  ) {
     user = (await User.findOne({
       where: {
         id: req.params.id,
