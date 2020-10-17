@@ -34,8 +34,8 @@ logger.on('error', (...args) => {
 
 const stream = {
   write: (message: any) => {
-    console.log(message)
-    logger.info(message)
+    //console.log(message)
+    //logger.info(message)
   },
 }
 
