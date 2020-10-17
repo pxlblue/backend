@@ -1,7 +1,7 @@
 import express from 'express'
 
 import { authMiddleware, userIsAdmin } from '../util/Middleware'
-import { Invite } from '../database/entities/Invite'
+import { Invite, InviteType } from '../database/entities/Invite'
 import { randomBytes } from '../util/RandomUtil'
 import { User } from '../database/entities/User'
 import argon2, { argon2id } from 'argon2'
@@ -407,6 +407,40 @@ UsersRouter.route('/:id/testimonial')
       testimonial: testimonial.serialize(),
     })
   })
+
+UsersRouter.route('/:id/unlimit').post(async (req, res) => {
+  let user = await getUser(req)
+
+  if (!user.limited)
+    return res
+      .status(400)
+      .json({ success: false, errors: ['your account is not limited'] })
+
+  let invite = await Invite.findOne({
+    where: {
+      invite: req.body.invite,
+      redeemed: false,
+      type: InviteType.DEFAULT,
+    },
+  })
+  if (!invite)
+    return res.status(400).json({
+      success: false,
+      errors: ['invite does not exist, or was already redeemed.'],
+    })
+  invite.redeemed = true
+  invite.redeemedAt = new Date()
+  invite.redeemedBy = user.id
+  invite.redeemedByUsername = user.username
+  await invite.save()
+
+  user.limited = false
+  await user.save()
+
+  return res
+    .status(200)
+    .json({ success: true, message: 'your account is now unlimited!' })
+})
 
 const BASE_UPLOADER_CONFIG = {
   Version: '13.1.0',
