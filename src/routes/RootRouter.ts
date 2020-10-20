@@ -12,6 +12,13 @@ RootRouter.route('/').all((req, res) => {
 })
 
 RootRouter.route('/testimonial').get(async (req, res) => {
+  return res.status(200).json({
+    success: true,
+    testimonial: {
+      testimonial: 'temp',
+      author: 'rel',
+    },
+  })
   let testimonial = await Testimonial.getRepository()
     .createQueryBuilder()
     .select(['testimonials.testimonial', 'testimonials.author'])
