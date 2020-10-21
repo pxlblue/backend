@@ -37,7 +37,7 @@ metadata:
   labels:
     app: backend
 spec:
-  replicas: 18
+  replicas: 15
   selector:
     matchLabels:
       app: backend
