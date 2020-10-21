@@ -24,20 +24,3 @@ steps:
       registry: gcr.io
       repo: gcr.io/pxlblue/backend
       tags: ["${DRONE_COMMIT}", "latest"]
-  - name: deploy
-    image: sinlead/drone-kubectl
-    environment:
-      K8S_CFGB64:
-        from_secret: k8s_config_b64
-      GKE_KEY:
-        from_secret: k8s_gke_key
-    commands:
-      - echo $GKE_KEY | base64 -d > service-account.json
-      - echo $K8S_CFGB64 | base64 -d > kubeconfig.yaml
-      - export GOOGLE_APPLICATION_CREDENTIALS=service-account.json
-      - export KUBECONFIG=kubeconfig.yaml
-      - kubectl config set-context gke --cluster=gke_pxlblue_us-central1-c_pxl-blue --user=gke_pxlblue_us-central1-c_pxl-blue --namespace=production
-      - kubectl config use-context gke
-      - kubectl get pods
-      - sed -i 's/:latest/:${DRONE_COMMIT}/g' kubernetes/deployment.yaml # Likely I should use kubectl patch, but I don't know how and i just want this shit to work so this should work for now lol
-      - kubectl apply -f kubernetes/deployment.yaml
