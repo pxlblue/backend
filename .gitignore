@@ -128,3 +128,5 @@ kubernetes/secret.json
 
 src/images/fonts/*.otf
 src/images/fonts/*.ttf
+
+docker-compose.yml

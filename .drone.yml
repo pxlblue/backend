@@ -18,9 +18,10 @@ steps:
   - name: publish
     image: plugins/docker
     settings:
-      username: _json_key
+      username:
+        from_secret: github_username
       password:
-        from_secret: gcr_key
-      registry: gcr.io
-      repo: gcr.io/pxlblue/backend
+        from_secret: github_key
+      registry: docker.pkg.github.com
+      repo: docker.pkg.github.com/pxlblue/backend/server
       tags: ["${DRONE_COMMIT}", "latest"]
