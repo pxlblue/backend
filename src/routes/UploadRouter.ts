@@ -43,7 +43,7 @@ async function uploadImage(
   if (!user.usedIps.includes(ip)) {
     user.usedIps = [...user.usedIps, ip]
   }
-  await user.save()
+  user.save() // Not awaited, slightly faster
 
   if (host === 'pxl_rand') {
     host = await getRandomHost(user)
