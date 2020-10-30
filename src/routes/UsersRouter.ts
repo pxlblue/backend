@@ -165,6 +165,9 @@ UsersRouter.route('/:id/invites')
       where: {
         creator: user.id,
       },
+      order: {
+        id: 'ASC',
+      },
     })
     return res.status(200).json({
       success: true,
