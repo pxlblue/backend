@@ -9,6 +9,7 @@ import {
   sendMail,
   verifyEmailTemplate,
   verifyEmailSuccessTemplate,
+  sendEmailVerification,
 } from '../util/MailUtil'
 import { Invite, InviteType } from '../database/entities/Invite'
 
@@ -143,7 +144,11 @@ AuthRouter.route('/register').post(async (req, res) => {
     }
   }
 
-  await sendVerificationEmail(user)
+  await sendVerificationEmail(
+    user /*,
+    user.username,
+    `${process.env.BASE_URL}/auth/verify_email?k=${user.emailVerificationToken}`*/
+  )
 
   return res.json({
     success: true,
