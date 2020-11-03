@@ -57,6 +57,22 @@ export class Image extends BaseEntity {
   @Column({ nullable: true })
   deletionKey: string
 
+  @Column({ default: false })
+  embed: boolean
+
+  @Column({
+    default: '',
+  })
+  embedTitle: string
+
+  @Column({
+    default: '',
+  })
+  embedDescription: string
+
+  @Column({ default: '' })
+  embedColor: string
+
   serialize() {
     return {
       id: this.id,
