@@ -66,14 +66,19 @@ async function uploadImage(
   if (host.startsWith('http://')) {
     image.url = `${host}/${image.path}`
   }
-  const sha256 = crypto.createHash('sha256')
-  image.hash = sha256.update(img).digest('hex')
+
+  image.hash = 'temp'
+
   image.uploader = user.id
   image.contentType = file.mimetype
   image.originalName = file.originalname
   image.uploaderIp = ip
   image.deletionKey = randomBytes(24)
-  await image.save()
+  image.save().then(() => {
+    const sha256 = crypto.createHash('sha256')
+    image.hash = sha256.update(img).digest('hex')
+    image.save()
+  })
   await bucket.file(image.path).save(img)
 
   return image
