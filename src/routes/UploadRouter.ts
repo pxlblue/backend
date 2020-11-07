@@ -28,7 +28,7 @@ const upload = multer({
   storage: multer.memoryStorage(),
 })
 
-async function getRandomHost(user: User): Promise<string> {
+function getRandomHost(user: User): string {
   return _.sample(user.settings_randomDomains) || 'i.pxl.blue'
 }
 
@@ -46,7 +46,7 @@ async function uploadImage(
   user.save() // Not awaited, slightly faster
 
   if (host === 'pxl_rand') {
-    host = await getRandomHost(user)
+    host = getRandomHost(user)
   }
 
   // process middleware
@@ -172,7 +172,7 @@ UploadRouter.route('/shorten').post(async (req, res) => {
   shortUrl.creator = user.id
   shortUrl.host = req.body.host || 'i.pxl.blue'
   if (shortUrl.host === 'pxl_rand') {
-    shortUrl.host = await getRandomHost(user)
+    shortUrl.host = getRandomHost(user)
   }
   shortUrl.creationTime = new Date()
   shortUrl.creatorIp = req.ip
