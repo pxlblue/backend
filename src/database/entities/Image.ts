@@ -63,6 +63,11 @@ export class Image extends BaseEntity {
   @Column({
     default: '',
   })
+  embedAuthor: string
+
+  @Column({
+    default: '',
+  })
   embedTitle: string
 
   @Column({
