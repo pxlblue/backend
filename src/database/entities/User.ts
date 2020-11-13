@@ -171,6 +171,22 @@ export class User extends BaseEntity {
   @Column({ default: false })
   deactivated: boolean
 
+  @Column({ default: false })
+  embed: boolean
+
+  @Column({
+    default: '',
+  })
+  embedAuthor: string
+
+  @Column({
+    default: '',
+  })
+  embedTitle: string
+
+  @Column({ default: '' })
+  embedColor: string
+
   serialize() {
     return {
       id: this.id,

@@ -70,11 +70,6 @@ export class Image extends BaseEntity {
   })
   embedTitle: string
 
-  @Column({
-    default: '',
-  })
-  embedDescription: string
-
   @Column({ default: '' })
   embedColor: string
 
