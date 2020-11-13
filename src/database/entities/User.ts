@@ -184,7 +184,7 @@ export class User extends BaseEntity {
   })
   embedTitle: string
 
-  @Column({ default: '' })
+  @Column({ default: '#1070ca' })
   embedColor: string
 
   serialize() {
