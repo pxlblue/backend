@@ -217,31 +217,18 @@ UsersRouter.route('/:id/embed')
   .post(async (req, res) => {
     let user = await getUser(req)
 
-    if (typeof req.body.embed !== 'boolean')
-      return res
-        .status(400)
-        .json({ success: false, errors: ['"embed" is not a bool'] })
-    if (typeof req.body.author !== 'string')
-      return res
-        .status(400)
-        .json({ success: false, errors: ['"author" is not a string'] })
-    if (typeof req.body.title !== 'string')
-      return res
-        .status(400)
-        .json({ success: false, errors: ['"title" is not a string'] })
-    if (typeof req.body.color !== 'string')
-      return res
-        .status(400)
-        .json({ success: false, errors: ['"color" is not a string'] })
-    if (req.body.color.match(/#[0-9a-f]{6}/gi))
-      return res.status(400).json({
-        success: false,
-        errors: ['"color" is not a hex color (e.g. #ff00ff)'],
-      })
-    user.embed = req.body.embed
-    user.embedAuthor = req.body.author
-    user.embedTitle = req.body.title
-    user.embedColor = req.body.color
+    if (typeof req.body.embed === 'boolean') user.embed = req.body.embed
+    if (typeof req.body.author === 'string') user.embedAuthor = req.body.author
+    if (typeof req.body.title === 'string') user.embedTitle = req.body.title
+    if (typeof req.body.color === 'string') {
+      if (!req.body.color.match(/#[0-9a-f]{6}/gi))
+        return res.status(400).json({
+          success: false,
+          errors: ['"color" is not a hex color (e.g. #ff00ff)'],
+        })
+      user.embedColor = req.body.color
+    }
+
     await user.save()
     return res.status(200).json({
       success: true,
