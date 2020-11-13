@@ -61,14 +61,24 @@ export class Image extends BaseEntity {
   embed: boolean
 
   @Column({
+    default: true,
+  })
+  embedAuthor: boolean
+
+  @Column({
     default: '',
   })
-  embedAuthor: string
+  embedAuthorStr: string
 
   @Column({
     default: '',
   })
   embedTitle: string
+
+  @Column({
+    default: '',
+  })
+  embedDescription: string
 
   @Column({ default: '' })
   embedColor: string

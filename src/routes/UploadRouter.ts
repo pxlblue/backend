@@ -14,6 +14,7 @@ import { bucket } from '../util/StorageUtil'
 import { processImage } from '../images'
 import _ from 'lodash'
 import { ShortURL } from '../database/entities/ShortURL'
+import moment from 'moment'
 
 const UploadRouter = express.Router()
 
@@ -30,6 +31,25 @@ const upload = multer({
 
 function getRandomHost(user: User): string {
   return _.sample(user.settings_randomDomains) || 'i.pxl.blue'
+}
+
+const MOMENT_TKN_REGEX = /{moment:([^}]+)}/i
+function parseEmbedString(fmt: string, user: User, image: Image): string {
+  let date = moment(image.uploadTime)
+  fmt = fmt
+    .replace(/{username}/gi, user.username)
+    .replace(/{date}/gi, date.format('MM/DD/YYYY'))
+    .replace(/{longdate}/gi, date.format('MMMM Do YYYY'))
+    .replace(/{time}/gi, date.format('LT'))
+    .replace(/{timestamp}/gi, date.format('MM/DD/YYYY LT'))
+    .replace(/{path}/gi, image.path)
+  let match = fmt.match(MOMENT_TKN_REGEX)
+  while (match) {
+    console.log(match[0], '->', match[1], '=', date.format(match[1]))
+    fmt = fmt.replace(match[0], date.format(match[1]))
+    match = fmt.match(MOMENT_TKN_REGEX)
+  }
+  return fmt
 }
 
 async function uploadImage(
@@ -57,6 +77,14 @@ async function uploadImage(
 
   let image = new Image()
   image.shortId = randomImageId(user.settings_secureURLs)
+  if (
+    user.embed &&
+    file.mimetype &&
+    file.mimetype.startsWith('image/') // only embed Images
+  ) {
+    image.shortId = 'em' + image.shortId
+    image.embed = user.embed
+  }
   image.host = host
   let ext = path.extname(file.originalname)
   image.path = `${image.shortId}${ext}`
@@ -74,6 +102,17 @@ async function uploadImage(
   image.originalName = file.originalname
   image.uploaderIp = ip
   image.deletionKey = randomBytes(24)
+  if (image.embed) {
+    image.embedAuthor = user.embedAuthor
+    image.embedAuthorStr = user.username
+    image.embedTitle = parseEmbedString(user.embedTitle, user, image)
+    image.embedDescription = parseEmbedString(
+      user.embedDescription,
+      user,
+      image
+    )
+    image.embedColor = user.embedColor
+  }
   image.save().then(() => {
     const sha256 = crypto.createHash('sha256')
     image.hash = sha256.update(img).digest('hex')

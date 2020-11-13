@@ -175,14 +175,19 @@ export class User extends BaseEntity {
   embed: boolean
 
   @Column({
-    default: '',
+    default: true,
   })
-  embedAuthor: string
+  embedAuthor: boolean
 
   @Column({
     default: '',
   })
   embedTitle: string
+
+  @Column({
+    default: '',
+  })
+  embedDescription: string
 
   @Column({ default: '#1070ca' })
   embedColor: string

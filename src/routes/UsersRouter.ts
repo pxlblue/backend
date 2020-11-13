@@ -210,6 +210,7 @@ UsersRouter.route('/:id/embed')
         embed: user.embed,
         author: user.embedAuthor,
         title: user.embedTitle,
+        description: user.embedDescription,
         color: user.embedColor,
       },
     })
@@ -218,8 +219,10 @@ UsersRouter.route('/:id/embed')
     let user = await getUser(req)
 
     if (typeof req.body.embed === 'boolean') user.embed = req.body.embed
-    if (typeof req.body.author === 'string') user.embedAuthor = req.body.author
+    if (typeof req.body.author === 'boolean') user.embedAuthor = req.body.author
     if (typeof req.body.title === 'string') user.embedTitle = req.body.title
+    if (typeof req.body.description === 'string')
+      user.embedDescription = req.body.description
     if (typeof req.body.color === 'string') {
       if (!req.body.color.match(/#[0-9a-f]{6}/gi))
         return res.status(400).json({
@@ -236,6 +239,7 @@ UsersRouter.route('/:id/embed')
         embed: user.embed,
         author: user.embedAuthor,
         title: user.embedTitle,
+        description: user.embedDescription,
         color: user.embedColor,
       },
     })
