@@ -209,6 +209,7 @@ UsersRouter.route('/:id/embed')
       settings: {
         embed: user.embed,
         author: user.embedAuthor,
+        authorStr: user.embedAuthorStr,
         title: user.embedTitle,
         description: user.embedDescription,
         color: user.embedColor,
@@ -223,6 +224,8 @@ UsersRouter.route('/:id/embed')
     if (typeof req.body.title === 'string') user.embedTitle = req.body.title
     if (typeof req.body.description === 'string')
       user.embedDescription = req.body.description
+    if (typeof req.body.authorStr === 'string')
+      user.embedAuthorStr = req.body.authorStr
     if (typeof req.body.color === 'string') {
       if (!req.body.color.match(/#[0-9a-f]{6}/gi))
         return res.status(400).json({
@@ -238,6 +241,7 @@ UsersRouter.route('/:id/embed')
       settings: {
         embed: user.embed,
         author: user.embedAuthor,
+        authorStr: user.embedAuthorStr,
         title: user.embedTitle,
         description: user.embedDescription,
         color: user.embedColor,

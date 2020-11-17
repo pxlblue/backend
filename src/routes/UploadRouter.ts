@@ -104,7 +104,11 @@ async function uploadImage(
   image.deletionKey = randomBytes(24)
   if (image.embed) {
     image.embedAuthor = user.embedAuthor
-    image.embedAuthorStr = user.username
+    image.embedAuthorStr = parseEmbedString(
+      user.embedAuthorStr || user.username,
+      user,
+      image
+    )
     image.embedTitle = parseEmbedString(user.embedTitle, user, image)
     image.embedDescription = parseEmbedString(
       user.embedDescription,
