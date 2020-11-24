@@ -112,6 +112,24 @@ AuthRouter.route('/register').post(async (req, res) => {
         errors,
       })
     }
+    let creator = await User.findOne({
+      where: {
+        id: invite!.creator,
+      },
+    })
+    if (!creator) {
+      errors.push('the creator of that invite does not exist')
+    }
+    if (creator && creator.banned) {
+      errors.push('your inviter is banned')
+    }
+    if (errors) {
+      return res.status(400).json({
+        success: false,
+        message: 'errors',
+        errors,
+      })
+    }
   }
 
   let user = new User()
