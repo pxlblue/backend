@@ -123,7 +123,7 @@ AuthRouter.route('/register').post(async (req, res) => {
     if (creator && creator.banned) {
       errors.push('your inviter is banned')
     }
-    if (errors) {
+    if (errors.length > 0) {
       return res.status(400).json({
         success: false,
         message: 'errors',
