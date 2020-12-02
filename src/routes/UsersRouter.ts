@@ -84,6 +84,17 @@ UsersRouter.route('/find').get(userIsAdmin(), async (req, res) => {
   return res.status(200).json({ success: true, user })
 })
 
+async function sendVerificationEmail(user: User) {
+  return sendMail(
+    user.email,
+    '[pxl.blue] verify your email',
+    verifyEmailTemplate(
+      user.username,
+      `https://api.pxl.blue/auth/verify_email?k=${user.emailVerificationToken}`
+    )
+  )
+}
+
 UsersRouter.route('/:id')
   .get(async (req, res) => {
     if (req.user.banned) {
@@ -132,6 +143,7 @@ UsersRouter.route('/:id')
       req.user.emailVerified = false
       req.user.lowercaseEmail = req.user.email.toLowerCase()
       req.user.emailVerificationToken = randomBytes()
+      await sendVerificationEmail(req.user)
       await req.user.save()
       return res.status(200).json({
         success: true,
