@@ -1,6 +1,7 @@
 import express from 'express'
 import {
   RootRouter,
+  AdminRouter,
   AuthRouter,
   UsersRouter,
   UploadRouter,
@@ -62,6 +63,7 @@ app.use(
 app.use(cors())
 
 app.use('/', RootRouter)
+app.use('/admin', AdminRouter)
 app.use('/auth', AuthRouter)
 app.use('/users', UsersRouter)
 app.use('/images', ImagesRouter)

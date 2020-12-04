@@ -1,4 +1,5 @@
 import RootRouter from './RootRouter'
+import AdminRouter from './AdminRouter'
 import AuthRouter from './AuthRouter'
 import UsersRouter from './UsersRouter'
 import ImagesRouter from './ImagesRouter'
@@ -12,6 +13,7 @@ import VoucherRouter from './VoucherRouter'
 import MatrixRouter from './MatrixRouter'
 export {
   RootRouter,
+  AdminRouter,
   AuthRouter,
   UsersRouter,
   ImagesRouter,

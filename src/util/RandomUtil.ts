@@ -5,6 +5,13 @@ export function randomBytes(length: number = 18): string {
   return crypto.randomBytes(length).toString('hex')
 }
 
+export function randomPassword(): string {
+  return crypto
+    .randomBytes(20)
+    .toString('base64')
+    .replace(/[\+\/\=]/gi, '')
+}
+
 export function createSessionToken(): string {
   return 'Bearer ' + crypto.randomBytes(96).toString('base64')
 }
