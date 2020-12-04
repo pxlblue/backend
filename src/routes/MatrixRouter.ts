@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { authMiddleware, userIsAdmin } from '../util/Middleware'
+import { authMiddleware } from '../util/Middleware'
 import bodyParser from 'body-parser'
 import { createMatrixUser } from '../util/MatrixUtil'
 

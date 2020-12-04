@@ -8,8 +8,7 @@ import moment from 'moment'
 import {
   sendMail,
   verifyEmailTemplate,
-  verifyEmailSuccessTemplate,
-  sendEmailVerification,
+  verifyEmailSuccessTemplate
 } from '../util/MailUtil'
 import { Invite, InviteType } from '../database/entities/Invite'
 

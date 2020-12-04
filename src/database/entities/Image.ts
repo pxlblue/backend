@@ -2,9 +2,7 @@ import {
   Entity,
   Column,
   BaseEntity,
-  PrimaryColumn,
-  OneToMany,
-  PrimaryGeneratedColumn,
+  PrimaryGeneratedColumn
 } from 'typeorm'
 @Entity()
 export class Image extends BaseEntity {

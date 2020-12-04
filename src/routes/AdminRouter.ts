@@ -6,7 +6,6 @@ import { randomPassword } from '../util/RandomUtil'
 import { authMiddleware, userIsAdmin } from '../util/Middleware'
 import geoip from 'geoip-lite'
 import IPToASN from 'ip-to-asn'
-import { lookup } from 'dns'
 
 const ipASNClient = new IPToASN()
 const AdminRouter = express.Router()

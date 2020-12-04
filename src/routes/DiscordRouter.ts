@@ -1,7 +1,6 @@
 import express from 'express'
 
-import { authMiddleware, userIsAdmin } from '../util/Middleware'
-import { Invite } from '../database/entities/Invite'
+import { authMiddleware } from '../util/Middleware'
 import { randomBytes } from '../util/RandomUtil'
 import { User } from '../database/entities/User'
 import bodyParser from 'body-parser'

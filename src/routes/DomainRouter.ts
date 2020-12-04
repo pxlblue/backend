@@ -1,9 +1,5 @@
 import express from 'express'
 
-import { authMiddleware, userIsAdmin } from '../util/Middleware'
-import { Invite } from '../database/entities/Invite'
-import { randomBytes } from '../util/RandomUtil'
-import { User } from '../database/entities/User'
 import bodyParser from 'body-parser'
 import { Domain } from '../database/entities/Domain'
 

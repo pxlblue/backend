@@ -1,6 +1,6 @@
 import ImageMiddleware from './Middleware'
 import { Image, Canvas, CanvasRenderingContext2D } from 'canvas'
-import { escapeString, parseGradient } from '../util'
+import { parseGradient } from '../util'
 import { IBorderMiddlewareOptions } from '../options'
 
 export default class BorderMiddleware extends ImageMiddleware {
