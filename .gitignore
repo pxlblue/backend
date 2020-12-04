@@ -130,3 +130,7 @@ src/images/fonts/*.otf
 src/images/fonts/*.ttf
 
 docker-compose.yml
+
+package-lock.json
+
+!.env.example
