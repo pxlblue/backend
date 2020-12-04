@@ -144,7 +144,7 @@ UploadRouter.route('/extra').post(upload.single('file'), async (req, res) => {
     return res.status(401).send({
       success: false,
       errors: [
-        'You are banned from pxl.blue\nCheck your email for more information',
+        'You are banned from pxl.blue\nCheck your email for more information.',
       ],
     })
   }
@@ -175,7 +175,7 @@ UploadRouter.route('/sharex').post(upload.single('file'), async (req, res) => {
     return res
       .status(200)
       .send(
-        'You are banned from pxl.blue\nCheck your email for more information'
+        'You are banned from pxl.blue\nCheck your email for more information.'
       )
   }
   let host = req.body.host || 'i.pxl.blue'
@@ -199,7 +199,7 @@ UploadRouter.route('/shorten').post(async (req, res) => {
     return res
       .status(200)
       .send(
-        'You are banned from pxl.blue\nCheck your email for more information'
+        'You are banned from pxl.blue\nCheck your email for more information.'
       )
   }
 
