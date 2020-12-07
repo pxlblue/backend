@@ -7,7 +7,7 @@ import { User } from '../database/entities/User'
 import argon2, { argon2id } from 'argon2'
 import bodyParser from 'body-parser'
 import { Image } from '../database/entities/Image'
-import { bucket } from '../util/StorageUtil'
+import { storage } from '../util/StorageUtil'
 import { Testimonial } from '../database/entities/Testimonial'
 import filter from '../util/FilterUtil'
 import { ShortURL } from '../database/entities/ShortURL'
@@ -330,12 +330,21 @@ UsersRouter.route('/:id/images/nuke').post(async (req, res) => {
       deleted: false,
     },
   })
+  // TODO: batch delete
   Promise.all(
     images.map(async (image) => {
-      await bucket.file(image.path).delete()
-      image.deleted = true
-      image.deletionReason = 'USER'
-      await image.save()
+      return new Promise((resolve, reject) => {
+        storage.removeObject(
+          process.env.STORAGE_BUCKET!,
+          image.path,
+          async () => {
+            image.deleted = true
+            image.deletionReason = 'USER'
+            await image.save()
+            resolve()
+          }
+        )
+      })
     })
   ).then(async () => {
     user.imageCount = await Image.count({

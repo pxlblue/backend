@@ -2,10 +2,11 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import { User } from '../database/entities/User'
 import argon2 from 'argon2'
-import { randomPassword } from '../util/RandomUtil'
+import { randomBytes, randomPassword } from '../util/RandomUtil'
 import { authMiddleware, userIsAdmin } from '../util/Middleware'
 import geoip from 'geoip-lite'
 import IPToASN from 'ip-to-asn'
+import { Invite } from '../database/entities/Invite'
 
 const ipASNClient = new IPToASN()
 const AdminRouter = express.Router()
@@ -133,5 +134,50 @@ AdminRouter.route('/users/:id/ips').get(async (req, res) => {
   )
   return res.status(200).json({ success: true, ips })
 })
+
+AdminRouter.route('/users/:id/invites')
+  .get(async (req, res) => {
+    let user = await getUserFromReq(req)
+    if (!user)
+      return res
+        .status(404)
+        .json({ success: false, errors: ['user not found'] })
+
+    let invites = await Invite.find({
+      order: {
+        id: 'DESC',
+      },
+      where: {
+        creator: user.id,
+      },
+    })
+
+    return res.status(200).json({
+      success: true,
+      invites: invites.map((invite) => invite.serialize()),
+    })
+  })
+  .post(async (req, res) => {
+    let user = await getUserFromReq(req)
+    if (!user)
+      return res
+        .status(404)
+        .json({ success: false, errors: ['user not found'] })
+
+    let count = req.body.count || 1
+    let invites = []
+    for (let i = 0; i < count; i++) {
+      let invite = new Invite()
+      invite.invite = randomBytes(20)
+      invite.createdAt = new Date()
+      invite.creator = user.id
+      await invite.save()
+      invites.push(invite)
+    }
+    return res.status(200).json({
+      success: true,
+      invites: invites.map((invite) => invite.serialize()),
+    })
+  })
 
 export default AdminRouter

@@ -10,7 +10,7 @@ import {
   randomInvisibleId,
 } from '../util/RandomUtil'
 import crypto from 'crypto'
-import { bucket } from '../util/StorageUtil'
+import { storage } from '../util/StorageUtil'
 import { processImage } from '../images'
 import _ from 'lodash'
 import { ShortURL } from '../database/entities/ShortURL'
@@ -59,72 +59,86 @@ async function uploadImage(
   useOriginalName: boolean,
   ip: string
 ): Promise<Image> {
-  user.imageCount = user.imageCount + 1
-  if (!user.usedIps.includes(ip)) {
-    user.usedIps = [...user.usedIps, ip]
-  }
-  user.save() // Not awaited, slightly faster
+  return new Promise(async (resolve, reject) => {
+    user.imageCount = user.imageCount + 1
+    if (!user.usedIps.includes(ip)) {
+      user.usedIps = [...user.usedIps, ip]
+    }
+    user.save() // Not awaited, slightly faster
 
-  if (host === 'pxl_rand') {
-    host = getRandomHost(user)
-  }
+    if (host === 'pxl_rand') {
+      host = getRandomHost(user)
+    }
 
-  // process middleware
-  let img = file.buffer
-  if (user.settings_imageMiddleware) {
-    img = await processImage(img, user.imageMiddleware)
-  }
+    // process middleware
+    let img = file.buffer
+    if (user.settings_imageMiddleware) {
+      img = await processImage(img, user.imageMiddleware)
+    }
 
-  let image = new Image()
-  image.shortId = randomImageId(user.settings_secureURLs)
-  if (
-    user.embed &&
-    file.mimetype &&
-    file.mimetype.startsWith('image/') // only embed Images
-  ) {
-    image.shortId = 'em' + image.shortId
-    image.embed = user.embed
-  }
-  image.host = host
-  let ext = path.extname(file.originalname)
-  image.path = `${image.shortId}${ext}`
-  image.size = file.size
-  image.uploadTime = new Date()
-  image.url = `https://${host}/${image.path}`
-  if (host.startsWith('http://')) {
-    image.url = `${host}/${image.path}`
-  }
+    let image = new Image()
+    image.shortId = randomImageId(user.settings_secureURLs)
+    if (
+      user.embed &&
+      file.mimetype &&
+      file.mimetype.startsWith('image/') // only embed Images
+    ) {
+      image.shortId = 'em' + image.shortId
+      image.embed = user.embed
+    }
+    image.host = host
+    let ext = path.extname(file.originalname)
+    image.path = `${image.shortId}${ext}`
+    image.size = file.size
+    image.uploadTime = new Date()
+    image.url = `https://${host}/${image.path}`
+    if (host.startsWith('http://')) {
+      image.url = `${host}/${image.path}`
+    }
 
-  image.hash = 'temp'
+    image.hash = 'temp'
 
-  image.uploader = user.id
-  image.contentType = file.mimetype
-  image.originalName = file.originalname
-  image.uploaderIp = ip
-  image.deletionKey = randomBytes(24)
-  if (image.embed) {
-    image.embedAuthor = user.embedAuthor
-    image.embedAuthorStr = parseEmbedString(
-      user.embedAuthorStr || user.username,
-      user,
-      image
+    image.uploader = user.id
+    image.contentType = file.mimetype
+    image.originalName = file.originalname
+    image.uploaderIp = ip
+    image.deletionKey = randomBytes(24)
+    if (image.embed) {
+      image.embedAuthor = user.embedAuthor
+      image.embedAuthorStr = parseEmbedString(
+        user.embedAuthorStr || user.username,
+        user,
+        image
+      )
+      image.embedTitle = parseEmbedString(user.embedTitle, user, image)
+      image.embedDescription = parseEmbedString(
+        user.embedDescription,
+        user,
+        image
+      )
+      image.embedColor = user.embedColor
+    }
+    image.save().then(() => {
+      const sha256 = crypto.createHash('sha256')
+      image.hash = sha256.update(img).digest('hex')
+      image.save()
+    })
+    storage.putObject(
+      process.env.STORAGE_BUCKET!,
+      image.path,
+      img,
+      img.byteLength,
+      {
+        'Content-Type': file.mimetype,
+        'X-Pxl-Uploader': user.id,
+        'X-Pxl-Uploader-Username': user.username,
+        'X-Pxl-Uploader-IP': ip,
+      },
+      () => {
+        resolve(image)
+      }
     )
-    image.embedTitle = parseEmbedString(user.embedTitle, user, image)
-    image.embedDescription = parseEmbedString(
-      user.embedDescription,
-      user,
-      image
-    )
-    image.embedColor = user.embedColor
-  }
-  image.save().then(() => {
-    const sha256 = crypto.createHash('sha256')
-    image.hash = sha256.update(img).digest('hex')
-    image.save()
   })
-  await bucket.file(image.path).save(img)
-
-  return image
 }
 
 UploadRouter.route('/extra').post(upload.single('file'), async (req, res) => {

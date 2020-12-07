@@ -5,7 +5,6 @@ import UsersRouter from './UsersRouter'
 import ImagesRouter from './ImagesRouter'
 import InvitesRouter from './InvitesRouter'
 import UploadRouter from './UploadRouter'
-import ProxyRouter from './ProxyRouter'
 import MailRouter from './MailRouter'
 import DiscordRouter from './DiscordRouter'
 import DomainRouter from './DomainRouter'
@@ -19,7 +18,6 @@ export {
   ImagesRouter,
   InvitesRouter,
   UploadRouter,
-  ProxyRouter,
   MailRouter,
   DiscordRouter,
   DomainRouter,

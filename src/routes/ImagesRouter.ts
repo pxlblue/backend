@@ -3,7 +3,7 @@ import express from 'express'
 import { authMiddleware, userIsAdmin } from '../util/Middleware'
 import bodyParser from 'body-parser'
 import { Image } from '../database/entities/Image'
-import { bucket } from '../util/StorageUtil'
+import { storage } from '../util/StorageUtil'
 
 const ImagesRouter = express.Router()
 
@@ -100,7 +100,7 @@ ImagesRouter.route('/:image/delete').get(async (req, res) => {
       `<meta http-equiv="refresh" content="5;URL='https://pxl.blue/account/images/'"/><h1>Image does not exist or deletion key was invalid</h1><p>Redirecting to pxl.blue in 5 seconds</p>`
     )
   }
-  await bucket.file(image.path).delete()
+  storage.removeObject(process.env.STORAGE_BUCKET!, image.path)
   image.deleted = true
   image.deletionReason = 'USER'
   await image.save()

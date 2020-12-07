@@ -5,7 +5,6 @@ import {
   AuthRouter,
   UsersRouter,
   UploadRouter,
-  ProxyRouter,
   ImagesRouter,
   InvitesRouter,
   MailRouter,
@@ -70,7 +69,6 @@ app.use('/images', ImagesRouter)
 app.use('/invites', InvitesRouter)
 app.use('/upload', UploadRouter)
 app.use('/mail', MailRouter)
-app.use('/proxy', ProxyRouter)
 app.use('/discord', DiscordRouter)
 app.use('/domains', DomainRouter)
 app.use('/voucher', VoucherRouter)
