@@ -57,7 +57,8 @@ async function uploadImage(
   user: User,
   file: Express.Multer.File,
   useOriginalName: boolean,
-  ip: string
+  ip: string,
+  filename?: string
 ): Promise<Image> {
   return new Promise(async (resolve, reject) => {
     user.imageCount = user.imageCount + 1
@@ -78,6 +79,18 @@ async function uploadImage(
 
     let image = new Image()
     image.shortId = randomImageId(user.settings_secureURLs)
+    let ext = path.extname(file.originalname)
+
+    if (useOriginalName) {
+      try {
+        await storage.statObject(
+          process.env.STORAGE_BUCKET!,
+          `${filename}${ext}`
+        )
+      } catch (err) {
+        image.shortId = filename!
+      }
+    }
     if (
       user.embed &&
       file.mimetype &&
@@ -87,7 +100,6 @@ async function uploadImage(
       image.embed = user.embed
     }
     image.host = host
-    let ext = path.extname(file.originalname)
     image.path = `${image.shortId}${ext}`
     image.size = file.size
     image.uploadTime = new Date()
@@ -162,8 +174,23 @@ UploadRouter.route('/extra').post(upload.single('file'), async (req, res) => {
       ],
     })
   }
+  let originalName = false
+  let filename = req.file.originalname
+  if (user.moderator && req.body.originalName) {
+    if (req.body.filename) {
+      filename = req.body.filename
+    }
+    originalName = true
+  }
   let host = req.body.host || 'i.pxl.blue'
-  let image = await uploadImage(host, user, req.file, false, req.realIp)
+  let image = await uploadImage(
+    host,
+    user,
+    req.file,
+    originalName,
+    req.realIp,
+    filename
+  )
   res.status(200).json({
     success: true,
     image,
