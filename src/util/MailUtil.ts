@@ -10,6 +10,19 @@ const VERIFY_EMAIL_SUCCESS_TEMPLATE = `Hello {username}!
 Your account signup and verification was a success!
 Login at <a href="https://pxl.blue">pxl.blue</a> and get started using your account.`
 
+const UNBAN_USER_TEMPLATE = `Hello {username}!
+
+Your suspension has been lifted from pxl.blue.
+You may login and use your account again.`
+
+const BAN_USER_TEMPLATE = `Hello {username}!
+
+Your account has been suspended from pxl.blue for reason
+
+{reason}
+
+You may appeal your suspension by emailing appeals@pxl.blue from the email on your account.`
+
 export async function sendMail(to: string, subject: string, html: string) {
   sgMail.setApiKey(process.env.EMAIL_KEY!)
   sgMail
@@ -57,4 +70,12 @@ export function verifyEmailTemplate(username: string, link: string) {
 
 export function verifyEmailSuccessTemplate(username: string) {
   return replaceTemplate(VERIFY_EMAIL_SUCCESS_TEMPLATE, { username })
+}
+
+export function unbanUserTemplate(username: string) {
+  return replaceTemplate(UNBAN_USER_TEMPLATE, { username })
+}
+
+export function banUserTemplate(username: string, reason: string) {
+  return replaceTemplate(BAN_USER_TEMPLATE, { username, reason })
 }

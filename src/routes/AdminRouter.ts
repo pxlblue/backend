@@ -7,6 +7,7 @@ import { authMiddleware, userIsAdmin } from '../util/Middleware'
 import geoip from 'geoip-lite'
 import IPToASN from 'ip-to-asn'
 import { Invite } from '../database/entities/Invite'
+import { sendMail, banUserTemplate, unbanUserTemplate } from '../util/MailUtil'
 
 const ipASNClient = new IPToASN()
 const AdminRouter = express.Router()
@@ -103,6 +104,11 @@ AdminRouter.route('/users/:id/ban').post(async (req, res) => {
   user.banned = true
   user.banReason = `${req.body.reason} ~${req.user.username}`
   await user.save()
+  await sendMail(
+    user.email,
+    '[pxl.blue] your account has been suspended',
+    banUserTemplate(user.username, user.banReason)
+  )
   return res.status(200).json({ success: true, user: user.serialize() })
 })
 AdminRouter.route('/users/:id/unban').post(async (req, res) => {
@@ -112,6 +118,11 @@ AdminRouter.route('/users/:id/unban').post(async (req, res) => {
   user.banned = false
   user.banReason = `${user.banReason}\n\nUnbanned by: ${req.user.username}`
   await user.save()
+  await sendMail(
+    user.email,
+    '[pxl.blue] your suspension has been lifted',
+    unbanUserTemplate(user.username)
+  )
   return res.status(200).json({ success: true, user: user.serialize() })
 })
 
