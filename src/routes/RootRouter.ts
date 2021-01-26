@@ -31,4 +31,8 @@ RootRouter.route('/testimonial').get(async (req, res) => {
   })
 })
 
+RootRouter.route('/challenge').get((req, res) => {
+  res.redirect('https://pxl.blue')
+})
+
 export default RootRouter
