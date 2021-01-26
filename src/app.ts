@@ -59,7 +59,11 @@ app.use(
   )
 )
 
-app.use(cors())
+app.use(
+  cors({
+    origin: ['www.pxl.blue', 'pxl.blue', 'localhost:8080', 'localhost:8000'],
+  })
+)
 
 app.use('/', RootRouter)
 app.use('/admin', AdminRouter)
