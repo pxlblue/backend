@@ -67,6 +67,7 @@ app.use(
       'http://localhost:8080',
       'http://localhost:8000',
     ],
+    credentials: true,
   })
 )
 
