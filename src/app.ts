@@ -61,7 +61,12 @@ app.use(
 
 app.use(
   cors({
-    origin: ['www.pxl.blue', 'pxl.blue', 'localhost:8080', 'localhost:8000'],
+    origin: [
+      'https://www.pxl.blue',
+      'https://pxl.blue',
+      'http://localhost:8080',
+      'http://localhost:8000',
+    ],
   })
 )
 
