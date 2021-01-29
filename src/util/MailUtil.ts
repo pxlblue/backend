@@ -30,7 +30,8 @@ export async function sendMail(to: string, subject: string, html: string) {
     from: process.env.EMAIL_FROM!,
     to,
     subject,
-    html,
+    html: html.replace(/\n/gi, '<br/>'),
+    text: html.replace(/<br\/?>/gi, '\n'),
   })
 }
 
